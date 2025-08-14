@@ -1,0 +1,52 @@
+/* File: css/style.css */
+
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa; /* Warna latar belakang lembut */
+}
+
+/* Tampilan halaman login */
+#loginContainer {
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  color: white;
+}
+#loginBtn {
+  border: 2px solid white;
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+#loginBtn:hover {
+  background-color: white;
+  color: #333;
+}
+
+/* Kustomisasi Loading Bar (NProgress) */
+#nprogress .bar {
+  background: #2575fc !important; /* Warna gradien biru */
+  height: 3px !important;
+}
+#nprogress .peg {
+  box-shadow: 0 0 10px #2575fc, 0 0 5px #2575fc !important;
+}
+#nprogress .spinner-icon {
+  border-top-color: #2575fc !important;
+  border-left-color: #2575fc !important;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f4f7f6; /* Anda juga bisa memindahkan ini */
+}
+
+/* ===== Kustomisasi Ukuran Font Navbar ===== */
+/* Untuk tulisan judul/brand "🏠 Cerita Bahasa Daerah" */
+.navbar-brand {
+  font-size: 1.15rem; /* Ubah angka ini sesuai selera */
+}
+/* Untuk link menu seperti "Beranda", "Pilih Bahasa", "Download", dll. */
+.nav-link {
+  font-size: 1.15rem; /* Ubah angka ini sesuai selera */
+}
