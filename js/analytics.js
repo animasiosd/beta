@@ -227,3 +227,23 @@ function logUserBehavior(eventName, detail1 = "", detail2 = "") {
     event_details_2: detail2
   });
 }
+
+function logDownloadPageInteraction(event_name, details1 = "", details2 = "") {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const payload = {
+        event_date: new Date().toISOString().split("T")[0],
+        event_timestamp: Date.now(),
+        user_id: user.uid,
+        user_name: user.displayName,
+        event_name: event_name,
+        event_details_1: details1,
+        event_details_2: details2
+    };
+
+    fetch(ANALYTICS_WEB_APP, {
+        method: "POST",
+        body: JSON.stringify(payload),
+    }).catch(err => console.error("logDownloadPageInteraction error:", err));
+}

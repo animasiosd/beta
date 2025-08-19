@@ -154,14 +154,18 @@
                 tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Tidak ada data yang cocok.</td></tr>';
                 return;
             }
-
+            
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td>${row.bahasa}</td><td>${row.urutan}</td><td>${row.title}</td>`;
-                tr.onclick = () => { window.open(row.link_download, '_blank'); };
+                tr.onclick = () => {
+                    logDownloadPageInteraction("download_video", row.bahasa, `${row.title} (Urutan ${row.urutan})`);
+                    window.open(row.link_download, '_blank');
+                };
                 tbody.appendChild(tr);
             });
         }
+
 
         function applyFilters() {
             const bahasa = document.getElementById('filterBahasa').value;
@@ -209,6 +213,10 @@
                     th.classList.add(sortAsc ? 'asc' : 'desc');
                 }
             });
+
+            // Tracking Sortir Tabel
+            logDownloadPageInteraction("sort_table", key, sortAsc ? "asc" : "desc");
+
             applyFilters();
         }
         
@@ -238,18 +246,42 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.filter-group select').forEach(select => {
-                select.addEventListener('change', applyFilters);
+                select.addEventListener('change', function () {
+                    applyFilters();
+                    
+                    if (this.id === "filterBahasa") {
+                        logDownloadPageInteraction("filter_bahasa", this.value || "Semua");
+                    }
+                    
+                    if (this.id === "filterUrutan") {
+                        logDownloadPageInteraction("filter_urutan", this.value || "Semua");
+                    }
+                    
+                    if (this.id === "filterJudul") {
+                        logDownloadPageInteraction("filter_judul", this.value || "Semua");
+                    }
+                });
             });
+            
             document.querySelectorAll('th.sortable').forEach(th => {
                 th.addEventListener('click', handleSort);
             });
             
-            // ▼▼▼ TAMBAHKAN EVENT LISTENER UNTUK TOMBOL BARU ▼▼▼
-            document.getElementById('resetFilters').addEventListener('click', resetAllFilters);
-            document.getElementById('resetSort').addEventListener('click', resetTableSort);
-
+            // Reset Filter
+            document.getElementById('resetFilters').addEventListener('click', () => {
+                resetAllFilters();
+                logDownloadPageInteraction("reset_filter", "Filter", "Semua");
+            });
+            
+            // Reset Urutan
+            document.getElementById('resetSort').addEventListener('click', () => {
+                resetTableSort();
+                logDownloadPageInteraction("reset_urutan", "Urutan", "Default");
+            });
+            
             fetchData();
         });
+
     </script>
 </body>
 </html>
