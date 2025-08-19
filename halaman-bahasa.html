@@ -54,12 +54,6 @@
             <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
         </div>
     </div>
-    
-    <script src="js/auth.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/analytics.js"></script>
-    <script src="js/video.js"></script>
-    <script src="js/comments.js"></script>
 
     <div id="mainContent">
         <main class="container my-4">
@@ -128,7 +122,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
-
 <!-- Modal Konfirmasi Hapus -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -147,7 +140,11 @@
     </div>
   </div>
 </div>
-
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/video.js"></script>
+    <script src="js/comments.js"></script>
     <script>
     let ytPlayer;
     let pendingVideoId = null;
@@ -176,7 +173,11 @@
                     height: '390',
                     width: '640',
                     videoId: '', // Tidak muat video langsung
-                    playerVars: {'autoplay': 0, 'controls': 1},
+                    playerVars: {
+                        'autoplay': 0,
+                        'controls': 1
+                    },
+                    
                     events: {
                         'onReady': (event) => {
                             console.log("✅ YouTube Player siap");
@@ -233,9 +234,7 @@
                                     }
                                 });
                             }
-            function onYouTubeIframeAPIReady() {
-    setupYTPlayer();
-}
+            window.onYouTubeIframeAPIReady = setupYTPlayer;
     </script>
 
     <script src="https://www.youtube.com/iframe_api"></script>
