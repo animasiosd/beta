@@ -36,6 +36,35 @@ function logout() {
   });
 }
 
+// 4️⃣ FUNSI MODAL LOGIN GAGAL (Dinamis)
+function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
+  let existingModal = document.getElementById("loginFailModal");
+  if (existingModal) existingModal.remove();
+
+  const modalDiv = document.createElement("div");
+  modalDiv.id = "loginFailModal";
+  modalDiv.className = "modal fade";
+  modalDiv.tabIndex = -1;
+  modalDiv.setAttribute("aria-hidden", "true");
+  modalDiv.innerHTML = `
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Login Gagal</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">${message}</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modalDiv);
+
+  const bsModal = new bootstrap.Modal(modalDiv);
+  bsModal.show();
+}
 
 // 3️⃣ PANTAU STATUS LOGIN DI SETIAP HALAMAN
 document.addEventListener('DOMContentLoaded', () => {
