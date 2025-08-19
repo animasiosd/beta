@@ -62,8 +62,8 @@ function loadComments(videoId) {
                                 <span class="like-btn ${liked ? 'liked' : ''}" data-comment-id="${comment.comment_id}">👍</span>
                                 <span class="ms-2 likes-count">${comment.likes_count > 0 ? comment.likes_count : ''}</span>
                                 ${isOwner ? `
-                                    <button class="btn btn-sm btn-outline-primary ms-3 edit-btn" data-comment-id="${comment.comment_id}" data-comment-text="${comment.comments_description}">Edit</button>
-                                    <button class="btn btn-sm btn-outline-danger ms-2 delete-btn" data-comment-id="${comment.comment_id}">Hapus</button>
+                                    <button class="btn btn-sm btn-outline-primary ms-3 edit-btn" data-comment-id="${comment.comment_id}" data-comment-text="${comment.comments_description}">Edit Komentar</button>
+                                    <button class="btn btn-sm btn-outline-danger ms-2 delete-btn" data-comment-id="${comment.comment_id}">Hapus Komentar</button>
                                 ` : ''}
                             </div>
                         </div>
@@ -105,7 +105,7 @@ function handleCommentSubmit(event) {
                 // Ambil judul video langsung dari elemen videoTitle
                 const currentVideoTitle = document.getElementById('videoTitle')?.textContent || "Tanpa Judul";
                 logUserBehavior("comment_submit", currentVideoTitle, text);
-                
+
                 loadComments(currentVideoId);  // Reload komentar
 
                 // 🧠 Tracking komentar untuk sheet video_interaction
@@ -123,11 +123,16 @@ function handleCommentSubmit(event) {
 function handleEditComment(commentId, currentText) {
     const commentTextEl = document.querySelector(`.comment-text[data-comment-id="${commentId}"]`);
     const editControlsEl = document.querySelector(`.edit-controls[data-comment-id="${commentId}"]`);
+    const actionsEl = editControlsEl.parentElement.querySelector('.comment-actions');
+
+    // Sembunyikan tombol Edit sementara
+    const editBtn = actionsEl.querySelector(`.edit-btn[data-comment-id="${commentId}"]`);
+    if (editBtn) editBtn.classList.add("d-none");
 
     editControlsEl.innerHTML = `
         <textarea class="form-control mb-2">${currentText}</textarea>
-        <button class="btn btn-sm btn-success me-2">Simpan</button>
-        <button class="btn btn-sm btn-secondary">Batal</button>
+        <button class="btn btn-sm btn-success me-2">Simpan Komentar</button>
+        <button class="btn btn-sm btn-secondary">Batal Edit</button>
     `;
 
     const [textarea, saveBtn, cancelBtn] = editControlsEl.children;
@@ -155,11 +160,14 @@ function handleEditComment(commentId, currentText) {
         });
     };
 
-    cancelBtn.onclick = () => loadComments(currentVideoId);
+    cancelBtn.onclick = () => {
+        loadComments(currentVideoId);
+    };
 
     commentTextEl.classList.add('d-none');
     editControlsEl.classList.remove('d-none');
 }
+
 
 // Fungsi hapus komentar (tanpa perubahan)
 function handleDeleteComment(commentId) {
