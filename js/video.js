@@ -12,7 +12,7 @@ function initPage() {
     const urlParams = new URLSearchParams(window.location.search);
 
     const language = urlParams.get('bahasa');
-    const languageDisplay = urlParams.get('display');
+    const languageDisplay = urlParams.get('value');
 
     if (!language) {
         videoTitle.textContent = "Parameter ?bahasa= tidak ditemukan.";
