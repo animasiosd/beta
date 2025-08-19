@@ -80,7 +80,7 @@ function loadDynamicLanguages() {
           link.className = 'dropdown-item';
           
           // UBAH BAGIAN INI: Tambahkan 'display' sebagai parameter URL baru
-          link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}}`;
+          link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}`;
           
           link.textContent = `Bahasa ${bahasa.display}`; // Tampilkan nama title window
 
