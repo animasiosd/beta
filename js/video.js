@@ -64,36 +64,37 @@ function initPage() {
                 videoSelect.appendChild(option);
             });
 
-            videoSelect.addEventListener('change', function () {
+            videoSelect.onchange = function () {
                 const videoId = this.value;
                 if (!videoId) {
                     videoTitle.textContent = "Silakan pilih video.";
                     window.currentVideoId = null;
-
-                    // ⛔ Jangan hapus player, cukup kosongkan jika perlu
                     return;
                 }
-
+                
+                if (videoId === window.currentVideoId) {
+                    // ⛔ Jangan log kalau pilihannya sama
+                    return;
+                }
+                
                 const selected = data.find(v => v.videoId === videoId);
                 videoTitle.textContent = selected ? selected.title : "Video";
-
                 window.currentVideoId = videoId;
-
+                
                 // 🔥 Tracking analytics: choose_video
                 if (typeof logUserBehavior === "function") {
                     logUserBehavior("choose_video", selected?.title || "Tanpa Judul", videoId);
                 }
-
-                // ✅ Gunakan fungsi dari halaman: loadVideoPlayer()
+                
                 if (typeof loadVideoPlayer === "function") {
                     loadVideoPlayer(videoId);
                 }
-
-                // ✅ Muat komentar jika fungsi tersedia
+                
                 if (typeof loadComments === "function") {
                     loadComments(videoId);
                 }
-            });
+            };  // ✅ cukup tutup dengan titik koma
+            
         })
         .catch(err => {
             console.error("❌ Gagal memuat video:", err);
