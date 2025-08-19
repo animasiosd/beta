@@ -54,6 +54,12 @@
             <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
         </div>
     </div>
+    
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/video.js"></script>
+    <script src="js/comments.js"></script>
 
     <div id="mainContent">
         <main class="container my-4">
@@ -142,11 +148,6 @@
   </div>
 </div>
 
-    <script src="js/auth.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/analytics.js"></script>
-    <script src="js/video.js"></script>
-    <script src="js/comments.js"></script>
     <script>
     let ytPlayer;
     let pendingVideoId = null;
@@ -175,11 +176,7 @@
                     height: '390',
                     width: '640',
                     videoId: '', // Tidak muat video langsung
-                    playerVars: {
-                        'autoplay': 0,
-                        'controls': 1
-                    },
-                    
+                    playerVars: {'autoplay': 0, 'controls': 1},
                     events: {
                         'onReady': (event) => {
                             console.log("✅ YouTube Player siap");
@@ -236,7 +233,9 @@
                                     }
                                 });
                             }
-            window.onYouTubeIframeAPIReady = setupYTPlayer;
+            function onYouTubeIframeAPIReady() {
+    setupYTPlayer();
+}
     </script>
 
     <script src="https://www.youtube.com/iframe_api"></script>
