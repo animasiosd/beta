@@ -79,6 +79,11 @@ function initPage() {
 
                 window.currentVideoId = videoId;
 
+                // 🔥 Tracking analytics: choose_video
+                if (typeof logUserBehavior === "function") {
+                    logUserBehavior("choose_video", selected?.title || "Tanpa Judul", videoId);
+                }
+
                 // ✅ Gunakan fungsi dari halaman: loadVideoPlayer()
                 if (typeof loadVideoPlayer === "function") {
                     loadVideoPlayer(videoId);
