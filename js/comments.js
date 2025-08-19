@@ -171,26 +171,39 @@ function handleEditComment(commentId, currentText) {
 
 // Fungsi hapus komentar (tanpa perubahan)
 function handleDeleteComment(commentId) {
-    if (!confirm("Yakin ingin menghapus komentar ini?")) return;
+    // Simpan commentId yang ingin dihapus ke variabel global
+    window.commentIdToDelete = commentId;
 
-    auth.currentUser.getIdToken(true).then(token => {
-        fetch(WEB_APP_URL_COMMENTS, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'delete_comment',
-                commentId: commentId,
-                userId: auth.currentUser.uid,
-                authToken: token
-            })
-        }).then(res => res.json()).then(result => {
-            if (result.status === "success") {
-                loadComments(currentVideoId);
-            } else {
-                alert("Gagal menghapus komentar.");
-            }
+    // Tampilkan modal
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    modal.show();
+
+    // Pastikan tombol hapus di modal tidak bind ganda
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    confirmBtn.onclick = () => {
+        auth.currentUser.getIdToken(true).then(token => {
+            fetch(WEB_APP_URL_COMMENTS, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'delete_comment',
+                    commentId: window.commentIdToDelete,
+                    userId: auth.currentUser.uid,
+                    authToken: token
+                })
+            }).then(res => res.json()).then(result => {
+                if (result.status === "success") {
+                    loadComments(currentVideoId);
+                } else {
+                    alert("Gagal menghapus komentar.");
+                }
+            });
         });
-    });
+
+        // Tutup modal setelah klik hapus
+        modal.hide();
+    };
 }
+
 
 // Fungsi like komentar (tanpa perubahan)
 function handleLikeClick(buttonElement) {
