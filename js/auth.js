@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).catch(error => {
         console.error("Login Gagal:", error);
-        alert("Login gagal. Silakan coba lagi.");
+        showLoginFailModal(); // <-- panggil modal Bootstrap
       });
     };
   }
