@@ -182,7 +182,6 @@
                     
                     events: {
                         'onReady': (event) => {
-                            console.log("✅ YouTube Player siap");
                             document.addEventListener("fullscreenchange", () => {
                                 if (document.fullscreenElement) {
                                     trackVideoInteraction("fullscreen");

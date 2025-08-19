@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function () {
         toggleNavbarVisibility(firebase.auth().currentUser);
 
         requestAnimationFrame(() => {
-          console.log("Cek elemen #languagesDropdown:", document.getElementById("languagesDropdown"));
           highlightActiveMenu();
           loadDynamicLanguages();
 
