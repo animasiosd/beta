@@ -28,10 +28,10 @@ function toggleNavbarVisibility(user) {
 
 // 2️⃣ FUNGSI LOGOUT GLOBAL
 function logout() {
-  logUserBehavior("logout_button");   // tracking
   auth.signOut().then(() => {
     // Arahkan pengguna kembali ke halaman utama setelah logout berhasil
     window.location.href = 'index.html';
+      logUserBehavior("logout_button");   // tracking
   }).catch((error) => {
     // Menangani jika terjadi error saat logout
     console.error('Logout Error:', error);

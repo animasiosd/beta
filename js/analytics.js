@@ -213,3 +213,17 @@ function attachPlayerEventListeners(player) {
     }
   });
 }
+
+function logUserBehavior(eventName, detail1 = "", detail2 = "") {
+  const user = firebase.auth().currentUser || null;
+
+  sendAnalyticsEvent("USER_BEHAVIOR", {
+    event_date: new Date().toLocaleDateString("id-ID"),
+    event_timestamp: getFormattedTimestampWIB(),
+    user_id: user ? user.uid : "ANONYM",
+    user_name: user ? user.displayName || "Tanpa Nama" : "ANONYM",
+    event_name: eventName,
+    event_details_1: detail1,
+    event_details_2: detail2
+  });
+}
