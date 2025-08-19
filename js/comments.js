@@ -101,6 +101,7 @@ function handleCommentSubmit(event) {
         }).then(res => res.json()).then(result => {
             if (result.status === "success") {
                 input.value = '';
+                logUserBehavior("comment_submit", currentVideoId, text);
                 loadComments(currentVideoId);  // Reload komentar
                 // 🧠 Tracking komentar untuk video_interaction
                 if (typeof trackVideoInteraction === "function") {
@@ -186,6 +187,7 @@ function handleLikeClick(buttonElement) {
     const commentId = buttonElement.dataset.commentId;
     const likesCountEl = buttonElement.nextElementSibling;
     const liked = buttonElement.classList.toggle('liked');
+    logUserBehavior("like_comment", "halaman-bahasa", commentId);
     let likes = parseInt(likesCountEl.textContent || '0');
     likesCountEl.textContent = liked ? likes + 1 : (likes - 1 > 0 ? likes - 1 : '');
 

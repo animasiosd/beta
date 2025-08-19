@@ -28,6 +28,7 @@ function toggleNavbarVisibility(user) {
 
 // 2️⃣ FUNGSI LOGOUT GLOBAL
 function logout() {
+  logUserBehavior("logout_button");   // tracking
   auth.signOut().then(() => {
     // Arahkan pengguna kembali ke halaman utama setelah logout berhasil
     window.location.href = 'index.html';
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
     loginBtn.onclick = () => {
+        logUserBehavior("login_button");
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).catch(error => {
         console.error("Login Gagal:", error);

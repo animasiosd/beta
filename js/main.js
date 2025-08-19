@@ -83,10 +83,17 @@ function loadDynamicLanguages() {
           link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}&display=${encodeURIComponent(bahasa.display)}`;
           
           link.textContent = `Bahasa ${bahasa.display}`; // Tampilkan nama yang rapi
+
+          // ✅ Tracking klik bahasa
+          link.addEventListener("click", () => {
+            logUserBehavior("language_selected", bahasa.display);
+          });
+          
           listItem.appendChild(link);
           dropdown.appendChild(listItem);
         });
       })
+      
       .catch((err) => {
         console.error("❌ Gagal memuat bahasa:", err);
         dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
