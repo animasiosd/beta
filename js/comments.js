@@ -16,10 +16,19 @@ document.getElementById('comment-section').addEventListener('click', function(ev
         handleEditComment(event.target.dataset.commentId, event.target.dataset.commentText);
     }
     if (event.target.classList.contains('delete-btn')) {
-        handleDeleteComment(event.target.dataset.commentId);
+        handleDeleteComment(event.target.dataset.commentId, event.target.dataset.commentText);
     }
     if (event.target.classList.contains('like-btn')) {
         handleLikeClick(event.target);
+    }
+});
+
+// Listener global untuk modal delete (cancel)
+document.getElementById("deleteConfirmModal").addEventListener("hidden.bs.modal", function () {
+    if (window.commentTextToDelete) {
+        logUserBehavior("delete_comment_cancelled", "halaman-bahasa", window.commentTextToDelete);
+        window.commentTextToDelete = null;
+        window.commentIdToDelete = null;
     }
 });
 
@@ -62,8 +71,12 @@ function loadComments(videoId) {
                                 <span class="like-btn ${liked ? 'liked' : ''}" data-comment-id="${comment.comment_id}">👍</span>
                                 <span class="ms-2 likes-count">${comment.likes_count > 0 ? comment.likes_count : ''}</span>
                                 ${isOwner ? `
-                                    <button class="btn btn-sm btn-outline-primary ms-3 edit-btn" data-comment-id="${comment.comment_id}" data-comment-text="${comment.comments_description}">Edit Komentar</button>
-                                    <button class="btn btn-sm btn-outline-danger ms-2 delete-btn" data-comment-id="${comment.comment_id}">Hapus Komentar</button>
+                                    <button class="btn btn-sm btn-outline-primary ms-3 edit-btn" 
+                                        data-comment-id="${comment.comment_id}" 
+                                        data-comment-text="${comment.comments_description}">Edit Komentar</button>
+                                    <button class="btn btn-sm btn-outline-danger ms-2 delete-btn" 
+                                        data-comment-id="${comment.comment_id}" 
+                                        data-comment-text="${comment.comments_description}">Hapus Komentar</button>
                                 ` : ''}
                             </div>
                         </div>
@@ -102,13 +115,11 @@ function handleCommentSubmit(event) {
             if (result.status === "success") {
                 input.value = '';
 
-                // Ambil judul video langsung dari elemen videoTitle
                 const currentVideoTitle = document.getElementById('videoTitle')?.textContent || "Tanpa Judul";
                 logUserBehavior("comment_submit", currentVideoTitle, text);
 
-                loadComments(currentVideoId);  // Reload komentar
+                loadComments(currentVideoId);
 
-                // 🧠 Tracking komentar untuk sheet video_interaction
                 if (typeof trackVideoInteraction === "function") {
                     trackVideoInteraction("comment", { comment_id: result.comment_id });
                 }
@@ -119,13 +130,13 @@ function handleCommentSubmit(event) {
     });
 }
 
-// Fungsi edit komentar (tanpa perubahan dari sebelumnya)
+// Fungsi edit komentar
 function handleEditComment(commentId, currentText) {
+    logUserBehavior("edit_comment_clicked", "halaman-bahasa", currentText);
     const commentTextEl = document.querySelector(`.comment-text[data-comment-id="${commentId}"]`);
     const editControlsEl = document.querySelector(`.edit-controls[data-comment-id="${commentId}"]`);
     const actionsEl = editControlsEl.parentElement.querySelector('.comment-actions');
 
-    // Sembunyikan tombol Edit sementara
     const editBtn = actionsEl.querySelector(`.edit-btn[data-comment-id="${commentId}"]`);
     if (editBtn) editBtn.classList.add("d-none");
 
@@ -140,6 +151,8 @@ function handleEditComment(commentId, currentText) {
     saveBtn.onclick = () => {
         const newText = textarea.value.trim();
         if (!newText) return;
+        logUserBehavior("edit_comment_saved", "halaman-bahasa", newText);
+
         auth.currentUser.getIdToken(true).then(token => {
             fetch(WEB_APP_URL_COMMENTS, {
                 method: 'POST',
@@ -161,6 +174,7 @@ function handleEditComment(commentId, currentText) {
     };
 
     cancelBtn.onclick = () => {
+        logUserBehavior("edit_comment_cancelled", "halaman-bahasa", currentText);
         loadComments(currentVideoId);
     };
 
@@ -168,19 +182,21 @@ function handleEditComment(commentId, currentText) {
     editControlsEl.classList.remove('d-none');
 }
 
-
-// Fungsi hapus komentar (tanpa perubahan)
-function handleDeleteComment(commentId) {
-    // Simpan commentId yang ingin dihapus ke variabel global
+// Fungsi hapus komentar
+function handleDeleteComment(commentId, commentText) {
+    logUserBehavior("delete_comment_clicked", "halaman-bahasa", commentText);
     window.commentIdToDelete = commentId;
+    window.commentTextToDelete = commentText;
 
-    // Tampilkan modal
     const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
     modal.show();
 
-    // Pastikan tombol hapus di modal tidak bind ganda
+    logUserBehavior("delete_comment_modal_shown", "halaman-bahasa", commentText);
+
     const confirmBtn = document.getElementById('confirmDeleteBtn');
     confirmBtn.onclick = () => {
+        logUserBehavior("delete_comment_confirmed", "halaman-bahasa", window.commentTextToDelete);
+
         auth.currentUser.getIdToken(true).then(token => {
             fetch(WEB_APP_URL_COMMENTS, {
                 method: 'POST',
@@ -199,13 +215,11 @@ function handleDeleteComment(commentId) {
             });
         });
 
-        // Tutup modal setelah klik hapus
         modal.hide();
     };
 }
 
-
-// Fungsi like komentar (tanpa perubahan)
+// Fungsi like komentar
 function handleLikeClick(buttonElement) {
     const user = auth.currentUser;
     if (!user) return alert("Login terlebih dahulu untuk menyukai komentar.");
@@ -226,6 +240,6 @@ function handleLikeClick(buttonElement) {
                 userId: user.uid,
                 authToken: token
             })
-        }).catch(() => loadComments(currentVideoId)); // fallback reload
+        }).catch(() => loadComments(currentVideoId));
     });
 }
