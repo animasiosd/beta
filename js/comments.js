@@ -101,9 +101,14 @@ function handleCommentSubmit(event) {
         }).then(res => res.json()).then(result => {
             if (result.status === "success") {
                 input.value = '';
-                logUserBehavior("comment_submit", currentVideoId, text);
+
+                // Ambil judul video langsung dari elemen videoTitle
+                const currentVideoTitle = document.getElementById('videoTitle')?.textContent || "Tanpa Judul";
+                logUserBehavior("comment_submit", currentVideoTitle, text);
+                
                 loadComments(currentVideoId);  // Reload komentar
-                // 🧠 Tracking komentar untuk video_interaction
+
+                // 🧠 Tracking komentar untuk sheet video_interaction
                 if (typeof trackVideoInteraction === "function") {
                     trackVideoInteraction("comment", { comment_id: result.comment_id });
                 }
