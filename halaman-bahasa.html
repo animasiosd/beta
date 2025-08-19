@@ -123,6 +123,25 @@
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
 
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Konfirmasi Hapus</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Apakah Anda yakin ingin menghapus komentar ini?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Hapus</button>
+      </div>
+    </div>
+  </div>
+</div>
+
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
     <script src="js/analytics.js"></script>
@@ -323,25 +342,6 @@ function logShareWhatsapp() {
     logUserBehavior("share_button", "whatsapp", videoTitle);
 }
 </script>
-
-<!-- Modal Konfirmasi Hapus -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Konfirmasi Hapus</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Apakah Anda yakin ingin menghapus komentar ini?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Hapus</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 </body>
 
