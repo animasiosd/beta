@@ -80,15 +80,15 @@ function loadDynamicLanguages() {
           link.className = 'dropdown-item';
           
           // UBAH BAGIAN INI: Tambahkan 'display' sebagai parameter URL baru
-          link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}&display=${encodeURIComponent(bahasa.display)}`;
+          link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}}`;
           
-          link.textContent = `Bahasa ${bahasa.display}`; // Tampilkan nama yang rapi
+          link.textContent = `Bahasa ${bahasa.display}`; // Tampilkan nama title window
 
           // ✅ Tracking klik bahasa
           link.addEventListener("click", () => {
             logUserBehavior("language_selected", bahasa.display);
           });
-          
+
           listItem.appendChild(link);
           dropdown.appendChild(listItem);
         });
