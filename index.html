@@ -11,6 +11,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0d6efd">
 
+  
 
   <style>
     #page-loader {
@@ -55,6 +56,42 @@
     </header>
   </div>
 
+  <!-- Pop-up Install PWA -->
+<div id="installPopup" style="
+    display:none; 
+    position:fixed; 
+    bottom:20px; 
+    left:20px; 
+    right:20px; 
+    background:#0d6efd; 
+    color:#fff; 
+    padding:15px; 
+    border-radius:10px; 
+    z-index:9999; 
+    display:flex; 
+    align-items:center; 
+    justify-content:space-between;
+    cursor: grab;
+">
+  <span>Pasang aplikasi ini di layar utama untuk pengalaman terbaik!</span>
+  <div>
+    <button id="installBtn" style="
+        margin-left:10px; 
+        padding:5px 10px; 
+        background:#fff; 
+        color:#0d6efd; 
+        border:none; 
+        border-radius:5px;
+    ">Install</button>
+    <button id="dismissBtn" style="
+        margin-left:5px; 
+        padding:5px 10px; 
+        background:transparent; 
+        color:#fff; 
+        border:none;
+    ">×</button>
+  </div>
+</div>
 
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
@@ -62,6 +99,76 @@
   <script src="js/main.js"></script>
   <script src="js/analytics.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> <!-- 🧠 Tambahkan ini -->
+
+  <!-- Pop-up Install PWA Script - Versi Final -->
+<script>
+let deferredPrompt;
+const installPopup = document.getElementById('installPopup');
+const installBtn = document.getElementById('installBtn');
+const dismissBtn = document.getElementById('dismissBtn');
+const manualInstallBtn = document.getElementById('manualInstallBtn');
+
+// Jangan tampilkan pop-up jika user sudah menutup sebelumnya
+if (localStorage.getItem('pwaInstallDismissed') === 'true') {
+  installPopup.style.display = 'none';
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (localStorage.getItem('pwaInstallDismissed') !== 'true') {
+    installPopup.style.display = 'flex';
+  }
+});
+
+// Tombol install pop-up
+installBtn.addEventListener('click', async () => {
+  installPopup.style.display = 'none';
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const choiceResult = await deferredPrompt.userChoice;
+    console.log('User response to install prompt:', choiceResult.outcome);
+    deferredPrompt = null;
+  }
+});
+
+// Tombol tutup pop-up
+dismissBtn.addEventListener('click', () => {
+  installPopup.style.display = 'none';
+  localStorage.setItem('pwaInstallDismissed', 'true'); 
+});
+
+// Tombol manual di navbar
+if (manualInstallBtn) {
+  manualInstallBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choiceResult = await deferredPrompt.userChoice;
+      console.log('User response to install prompt:', choiceResult.outcome);
+      deferredPrompt = null;
+    }
+  });
+}
+
+// Drag pop-up
+let isDragging = false, startX, startY;
+installPopup.addEventListener('mousedown', e => {
+  isDragging = true;
+  startX = e.clientX - installPopup.offsetLeft;
+  startY = e.clientY - installPopup.offsetTop;
+  installPopup.style.cursor = 'grabbing';
+});
+window.addEventListener('mousemove', e => {
+  if (isDragging) {
+    installPopup.style.left = (e.clientX - startX) + 'px';
+    installPopup.style.top = (e.clientY - startY) + 'px';
+  }
+});
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  installPopup.style.cursor = 'grab';
+});
+</script>
 
   <script>
   firebase.auth().onAuthStateChanged(function(user) {
