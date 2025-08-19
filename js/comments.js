@@ -225,12 +225,25 @@ function handleLikeClick(buttonElement) {
     if (!user) return alert("Login terlebih dahulu untuk menyukai komentar.");
 
     const commentId = buttonElement.dataset.commentId;
+
+    // ✅ Ambil teks komentar
+    const commentTextEl = document.querySelector(`.comment-text[data-comment-id="${commentId}"]`);
+    const commentText = commentTextEl ? commentTextEl.textContent.trim() : "(Komentar tidak ditemukan)";
+
     const likesCountEl = buttonElement.nextElementSibling;
+
+    // Toggle liked
     const liked = buttonElement.classList.toggle('liked');
-    logUserBehavior("like_comment", "halaman-bahasa", commentId);
+
+    // ✅ Tentukan event_name sesuai aksi
+    const eventName = liked ? "liked_comment" : "unliked_comment";
+    logUserBehavior(eventName, "halaman-bahasa", commentText);
+
+    // Update UI jumlah like
     let likes = parseInt(likesCountEl.textContent || '0');
     likesCountEl.textContent = liked ? likes + 1 : (likes - 1 > 0 ? likes - 1 : '');
 
+    // Simpan ke server
     auth.currentUser.getIdToken(true).then(token => {
         fetch(WEB_APP_URL_COMMENTS, {
             method: 'POST',
@@ -240,6 +253,7 @@ function handleLikeClick(buttonElement) {
                 userId: user.uid,
                 authToken: token
             })
-        }).catch(() => loadComments(currentVideoId));
+        }).catch(() => loadComments(currentVideoId)); // fallback reload
     });
 }
+
