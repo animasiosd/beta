@@ -228,7 +228,7 @@ function logUserBehavior(eventName, detail1 = "", detail2 = "") {
   });
 }
 
-function logDownloadPageInteraction(action_type, action_key = "", action_value = "") {
+function logDownloadPageInteraction(action_type, action_key = "", action_value = "", action_detail = "") {
   const user = firebase.auth().currentUser;
   if (!user) return;
 
@@ -240,7 +240,8 @@ function logDownloadPageInteraction(action_type, action_key = "", action_value =
       user_name: user.displayName || "Tanpa Nama",
       action_type: action_type,
       action_key: action_key,
-      action_value: action_value
+      action_value: action_value,
+      action_detail: action_detail
     }
   };
 

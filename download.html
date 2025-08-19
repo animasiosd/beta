@@ -158,14 +158,19 @@
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td>${row.bahasa}</td><td>${row.urutan}</td><td>${row.title}</td>`;
+                
                 tr.onclick = () => {
-                    logDownloadPageInteraction("download_video", row.bahasa, `${row.title} (Urutan ${row.urutan})`);
-                    window.open(row.link_download, '_blank');
-                };
-                tbody.appendChild(tr);
-            });
-        }
-
+                    logDownloadPageInteraction(
+                        "download_video",      // action_type
+                        row.bahasa,            // action_key
+                        row.title,             // action_value
+                        `Urutan ${row.urutan}` // action_detail
+                        );
+                        window.open(row.link_download, '_blank');
+                    };        
+                    tbody.appendChild(tr);
+                });
+            }
 
         function applyFilters() {
             const bahasa = document.getElementById('filterBahasa').value;
@@ -250,15 +255,15 @@
                     applyFilters();
                     
                     if (this.id === "filterBahasa") {
-                        logDownloadPageInteraction("filter_bahasa", this.value || "Semua");
+                        logDownloadPageInteraction("filter_bahasa", "bahasa", this.value || "Semua");
                     }
                     
                     if (this.id === "filterUrutan") {
-                        logDownloadPageInteraction("filter_urutan", this.value || "Semua");
+                        logDownloadPageInteraction("filter_urutan", "urutan", this.value || "Semua");
                     }
                     
                     if (this.id === "filterJudul") {
-                        logDownloadPageInteraction("filter_judul", this.value || "Semua");
+                        logDownloadPageInteraction("filter_judul", "judul" , this.value || "Semua");
                     }
                 });
             });
@@ -270,7 +275,7 @@
             // Reset Filter
             document.getElementById('resetFilters').addEventListener('click', () => {
                 resetAllFilters();
-                logDownloadPageInteraction("reset_filter", "Filter", "Semua");
+                logDownloadPageInteraction("reset_filter", "Filter", "Default");
             });
             
             // Reset Urutan
