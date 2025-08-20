@@ -195,14 +195,15 @@ document.addEventListener("DOMContentLoaded", function() {
   }, 10);
 });
 
-// Service Worker
+// Service Worker Registration
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
+  window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('Service Worker terdaftar.', reg))
-      .catch(err => console.error('Service Worker gagal:', err));
+      .then(reg => console.log('[SW] Registered:', reg.scope))
+      .catch(err => console.error('[SW] Failed:', err));
   });
 }
+
 </script>
 
 </body>
