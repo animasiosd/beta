@@ -38,6 +38,7 @@ function logout() {
 // Login dengan Google Redirect
 document.addEventListener('DOMContentLoaded', () => {
   const loginContainer = document.getElementById("loginContainer");
+  const pageLoader = document.getElementById("page-loader");
   const mainContent = document.getElementById("mainContent");
   const loginBtn = document.getElementById("loginBtn");
 
