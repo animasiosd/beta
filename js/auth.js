@@ -7,10 +7,11 @@ const firebaseConfig = {
   messagingSenderId: "424179260770",
   appId: "1:424179260770:web:2f4a04a8c9643027bca03b",
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// 2️⃣ Navbar otomatis dimuat saat login
+// 2️⃣ Tampilkan atau sembunyikan navbar otomatis
 function toggleNavbarVisibility(user) {
   const navbarPlaceholder = document.getElementById('navbar-placeholder');
   if (!navbarPlaceholder) return;
@@ -23,22 +24,21 @@ function toggleNavbarVisibility(user) {
       .then(res => res.text())
       .then(html => {
         navbarPlaceholder.innerHTML = html;
-      })
-      .catch(err => console.error("Gagal memuat navbar:", err));
+      });
   }
 }
 
 // 3️⃣ Fungsi Logout
 function logout() {
   try { logUserBehavior("logout_button"); } catch {}
-  auth.signOut().then(() => {
-    window.location.href = 'index.html';
-  }).catch(error => {
-    console.error('Logout Error:', error);
-  });
+  auth.signOut()
+    .then(() => {
+      window.location.href = 'index.html';
+    })
+    .catch(error => console.error('Logout Error:', error));
 }
 
-// 4️⃣ Modal Login Gagal (Fallback jika Bootstrap belum siap)
+// 4️⃣ Modal Login Gagal
 function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
   let existingModal = document.getElementById("loginFailModal");
   if (existingModal) existingModal.remove();
@@ -78,14 +78,14 @@ function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
   }
 }
 
-// 5️⃣ Login dengan Google Popup
+// 5️⃣ Login Google dengan POPUP
 document.addEventListener('DOMContentLoaded', () => {
   const loginContainer = document.getElementById("loginContainer");
   const pageLoader = document.getElementById("page-loader");
   const mainContent = document.getElementById("mainContent");
   const loginBtn = document.getElementById("loginBtn");
 
-  // Tombol Login dengan Popup
+  // Tombol Login
   if (loginBtn) {
     loginBtn.onclick = () => {
       try { logUserBehavior("login_button"); } catch {}
@@ -96,9 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const user = result.user;
           console.log("Login berhasil:", user.displayName);
 
-          // Update UI setelah login sukses
+          // Update UI
           toggleNavbarVisibility(user);
-
           if (mainContent) mainContent.classList.remove('d-none');
           if (loginContainer) loginContainer.classList.add('d-none');
 
@@ -114,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // 6️⃣ Update UI otomatis berdasar status login
+  // 6️⃣ Update UI saat status login berubah
   auth.onAuthStateChanged(user => {
     toggleNavbarVisibility(user);
 
