@@ -143,14 +143,22 @@ function trackVideoInteraction(interactionType, additionalData = {}) {
     ...additionalData,
     latitude: geo.latitude || "",
     longitude: geo.longitude || "",
+    continent: geo.continent || "",
     country: geo.country || "",
-    state_province: geo.state_province || "",
+    country_code: geo.country_code || "",
+    state: geo.state || "",
+    county: geo.county || "",
     city: resolveCityName(geo),
+    municipality: geo.municipality || "",
+    town: geo.town || "",
+    village: geo.village || "",
+    suburb: geo.suburb || "",
+    road: geo.road || "",
     postcode: geo.postcode || "",
-    timezone: geo.timezone || ""
+    timezone: geo.timezone || "",
+    display_name: geo.display_name || ""
   });
 }
-
 
 /**
  * Kirim data interaksi video dengan dukungan geoTracker.js
@@ -221,7 +229,6 @@ function sendVideoInteractionToAnalytics(enrichedData) {
   });
 }
 
-
 document.addEventListener("DOMContentLoaded", () => {
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
@@ -264,11 +271,20 @@ function trackWatchProgress(currentTime, duration) {
       video_completed: "",
       latitude: geo.latitude || "",
       longitude: geo.longitude || "",
+      continent: geo.continent || "",
       country: geo.country || "",
-      state_province: geo.state_province || "",
+      country_code: geo.country_code || "",
+      state: geo.state || "",
+      county: geo.county || "",
       city: resolveCityName(geo),
+      municipality: geo.municipality || "",
+      town: geo.town || "",
+      village: geo.village || "",
+      suburb: geo.suburb || "",
+      road: geo.road || "",
       postcode: geo.postcode || "",
-      timezone: geo.timezone || ""
+      timezone: geo.timezone || "",
+      display_name: geo.display_name || ""
     });
   }
 
