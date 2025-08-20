@@ -1,78 +1,91 @@
-// File: js/userlocationnotification.js
+// File: js/userLocationNotification.js
+
 document.addEventListener("DOMContentLoaded", () => {
-  // Tambahkan modal ke body
-  const modalHTML = `
-    <div id="locationModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-      <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center">
-        <h2 class="text-xl font-bold mb-4">Izinkan Akses Lokasi</h2>
-        <p class="text-gray-700 mb-6">
-          Animasiosd ingin mengetahui lokasi Anda.<br><br>
-          Kami <strong>tidak menjual data pribadi Anda</strong>.<br>
-          Kami hanya ingin memberikan pengalaman terbaik<br>
-          berdasarkan <strong>bahasa suku Anda</strong>.
-          <br><br>
-          Apakah Anda memahami sepenuhnya?
-        </p>
-        <button id="allowLocationBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-lg">
-          Mengerti
-        </button>
+  // Fungsi untuk membuat popup
+  function createLocationPopup() {
+    // Jika popup sudah ada, jangan buat lagi
+    if (document.getElementById("location-popup")) return;
+
+    const popup = document.createElement("div");
+    popup.id = "location-popup";
+    popup.style.position = "fixed";
+    popup.style.top = "0";
+    popup.style.left = "0";
+    popup.style.width = "100%";
+    popup.style.height = "100%";
+    popup.style.backgroundColor = "rgba(0,0,0,0.5)";
+    popup.style.display = "flex";
+    popup.style.justifyContent = "center";
+    popup.style.alignItems = "center";
+    popup.style.zIndex = "9999";
+
+    popup.innerHTML = `
+      <div style="
+        background: white;
+        padding: 25px;
+        max-width: 400px;
+        border-radius: 8px;
+        text-align: center;
+        font-family: sans-serif;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      ">
+        <h2>Izinkan Lokasi</h2>
+        <p>Untuk menggunakan aplikasi ini, kami memerlukan akses lokasi Anda. 
+        Lokasi digunakan untuk personalisasi konten dan keamanan.</p>
+        <button id="allow-location-btn" style="
+          padding: 10px 20px;
+          margin-top: 15px;
+          border: none;
+          background-color: #007bff;
+          color: white;
+          font-size: 16px;
+          border-radius: 5px;
+          cursor: pointer;
+        ">Izinkan Lokasi</button>
       </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML("beforeend", modalHTML);
+    `;
 
-  const locationModal = document.getElementById("locationModal");
-  const allowLocationBtn = document.getElementById("allowLocationBtn");
+    document.body.appendChild(popup);
 
-  // Jika user sudah pernah diminta, jangan tampilkan modal lagi
-  firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-      const hasAsked = localStorage.getItem("location_permission_requested");
-      if (!hasAsked) {
-        locationModal.classList.remove("hidden");
-      }
-    }
-  });
-
-  // Fungsi request lokasi
-  function requestLocation() {
-    locationModal.classList.add("hidden");
-    localStorage.setItem("location_permission_requested", "true");
-
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          // Simpan lokasi ke window.latestGeoData agar analytics.js bisa pakai otomatis
-          window.latestGeoData = {
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude
-          };
-          console.log("✅ Lokasi diizinkan:", window.latestGeoData);
-        },
-        err => {
-          console.warn("⚠️ User menolak izin lokasi:", err.message);
-          alert("Anda menolak izin lokasi. Beberapa fitur mungkin tidak optimal.");
-        }
-      );
-    } else {
-      alert("Browser Anda tidak mendukung fitur lokasi.");
-    }
+    // Event klik tombol "Izinkan Lokasi"
+    document.getElementById("allow-location-btn").addEventListener("click", () => {
+      requestUserLocation();
+    });
   }
 
-  // Klik tombol Mengerti → request lokasi
-  allowLocationBtn.addEventListener("click", requestLocation);
-
-  // Klik di luar modal → tetap request lokasi
-  locationModal.addEventListener("click", (e) => {
-    if (e.target === locationModal) {
-      requestLocation();
+  // Fungsi untuk meminta lokasi user
+  function requestUserLocation() {
+    if (!navigator.geolocation) {
+      alert("Browser Anda tidak mendukung fitur lokasi.");
+      return;
     }
-  });
 
-  // Tekan ESC → dianggap "Mengerti"
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !locationModal.classList.contains("hidden")) {
-      requestLocation();
-    }
-  });
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // User mengizinkan lokasi
+        const popup = document.getElementById("location-popup");
+        if (popup) popup.remove();
+        console.log("Lokasi diterima:", position.coords);
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          alert("Akses lokasi wajib. Anda akan logout.");
+          // Logout Firebase
+          if (firebase && firebase.auth) {
+            firebase.auth().signOut();
+          }
+        }
+      }
+    );
+  }
+
+  // Listen login state Firebase
+  if (firebase && firebase.auth) {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        // User login → tampilkan popup lokasi
+        createLocationPopup();
+      }
+    });
+  }
 });
