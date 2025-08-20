@@ -10,10 +10,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// ▼▼▼ Tampilkan/sembunyikan navbar (tanpa fetch ulang)
+// Navbar otomatis dimuat saat login
 function toggleNavbarVisibility(user) {
-  const ph = document.getElementById('navbar-placeholder');
-  if (ph) ph.style.display = user ? 'block' : 'none';
+  const navbarPlaceholder = document.getElementById('navbar-placeholder');
+  if (navbarPlaceholder) {
+    navbarPlaceholder.style.display = user ? 'block' : 'none';
+  }
+  if (user && !document.querySelector("#languagesDropdown")) {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        navbarPlaceholder.innerHTML = html;
+      });
+  }
 }
 
 // 2️⃣ Logout
@@ -25,6 +34,37 @@ function logout() {
     console.error('Logout Error:', error);
   });
 }
+
+// Login dengan Google Redirect
+document.addEventListener('DOMContentLoaded', () => {
+  const loginContainer = document.getElementById("loginContainer");
+  const mainContent = document.getElementById("mainContent");
+  const loginBtn = document.getElementById("loginBtn");
+
+  // Tombol Login
+  if (loginBtn) {
+    loginBtn.onclick = () => {
+      logUserBehavior("login_button");
+      localStorage.setItem("redirectAfterLogin", window.location.href);
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithRedirect(provider).catch(error => {
+        console.error("Login Gagal:", error);
+      });
+    };
+  }
+
+  // Tangani hasil redirect
+  auth.getRedirectResult()
+    .then(result => {
+      if (result.user) {
+        const redirectUrl = localStorage.getItem("redirectAfterLogin");
+        if (redirectUrl) {
+          localStorage.removeItem("redirectAfterLogin");
+          window.location.href = redirectUrl;
+        }
+      }
+    })
+    .catch(error => console.error("Error redirect:", error));
 
 // 3️⃣ Modal Login Gagal (fallback jika bootstrap belum siap)
 function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
@@ -66,48 +106,6 @@ function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
     console.error("Gagal menampilkan modal:", e);
   }
 }
-
-// 4️⃣ Login dengan Redirect + kembali ke halaman asal
-document.addEventListener('DOMContentLoaded', () => {
-  const pageLoader     = document.getElementById("page-loader");
-  const loginContainer = document.getElementById("loginContainer");
-  const mainContent    = document.getElementById("mainContent");
-  const loginBtn       = document.getElementById("loginBtn");
-
-  if (loginBtn) {
-    loginBtn.onclick = () => {
-      try { logUserBehavior("login_button"); } catch {}
-      // Simpan halaman asal
-      localStorage.setItem("redirectAfterLogin", window.location.href);
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithRedirect(provider).catch(error => {
-        console.error("Login Gagal:", error);
-        showLoginFailModal();
-      });
-    };
-  }
-
-  // 5️⃣ Tangani hasil redirect
-  auth.getRedirectResult()
-    .then(result => {
-      if (result.user) {
-        console.log("Login berhasil:", result.user.displayName);
-
-        const redirectUrl = localStorage.getItem("redirectAfterLogin");
-        localStorage.removeItem("redirectAfterLogin");
-
-        // Jika ada halaman asal dan berbeda dengan halaman saat ini → kembali ke sana
-        if (redirectUrl && redirectUrl !== window.location.href) {
-          window.location.replace(redirectUrl);
-          return; // hentikan eksekusi lanjutan di halaman ini
-        }
-        // Jika sama, biarkan onAuthStateChanged yang update UI
-      }
-    })
-    .catch(error => {
-      console.error("Error redirect:", error);
-      showLoginFailModal();
-    });
 
   // 6️⃣ Update UI berdasar status login (tanpa paksa pindah halaman)
   auth.onAuthStateChanged(user => {
