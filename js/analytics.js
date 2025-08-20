@@ -131,7 +131,8 @@ function trackVideoInteraction(interactionType, additionalData = {}) {
   const videoTitle = document.getElementById("videoTitle")?.textContent || "Tanpa Judul";
   const language = window.currentLanguagePage || null;
   const videoId = window.currentVideoId || null;
-  
+  const geo = window.latestGeoData || {};
+
   sendVideoInteraction({
     user_id: user ? user.uid : "ANONYM",
     user_name: user ? user.displayName : "TIDAK DIKETAHUI",
@@ -139,9 +140,17 @@ function trackVideoInteraction(interactionType, additionalData = {}) {
     video_id: videoId,
     video_title: videoTitle,
     interaction_type: interactionType,
+    latitude: geo.latitude || "",
+    longitude: geo.longitude || "",
+    country: geo.country || "",
+    state_province: geo.state_province || "",
+    city: resolveCityName(geo),
+    postcode: geo.postcode || "",
+    timezone: geo.timezone || "",
     ...additionalData
   });
 }
+
 
 /**
  * Kirim data interaksi video dengan dukungan geoTracker.js
@@ -191,12 +200,14 @@ function trackWatchProgress(currentTime, duration) {
   const videoId = window.currentVideoId || null;
   const language = window.currentLanguagePage || null;
   const title = document.getElementById("videoTitle")?.textContent || "Tanpa Judul";
+  const geo = window.latestGeoData || {};
 
-  if (!videoId || !duration || percentage < 5) return;
+  if (!videoId || !duration || percentage < 1) return;
 
   const lastSent = videoProgressSession[videoId] || 0;
   const isCompleted = percentage >= 95;
 
+  // ✅ Kirim progress pada 25%, 50%, 75%, 95%
   const allowedPoints = [25, 50, 75, 95];
   if (allowedPoints.includes(percentage) && percentage !== lastSent) {
     videoProgressSession[videoId] = percentage;
@@ -208,10 +219,18 @@ function trackWatchProgress(currentTime, duration) {
       video_id: videoId,
       video_title: title,
       interaction_type: "progress_update",
-      video_watch_percentage: percentage
+      video_watch_percentage: percentage,
+      latitude: geo.latitude || "",
+      longitude: geo.longitude || "",
+      country: geo.country || "",
+      state_province: geo.state_province || "",
+      city: resolveCityName(geo),
+      postcode: geo.postcode || "",
+      timezone: geo.timezone || ""
     });
   }
 
+  // ✅ Tetap kirim data ketika video selesai ditonton
   if (isCompleted && !videoCompletedSession[videoId]) {
     videoCompletedSession[videoId] = true;
 
@@ -223,10 +242,18 @@ function trackWatchProgress(currentTime, duration) {
       video_title: title,
       interaction_type: "video_completed",
       video_watch_percentage: percentage,
-      video_completed: "yes"
+      video_completed: "yes",
+      latitude: geo.latitude || "",
+      longitude: geo.longitude || "",
+      country: geo.country || "",
+      state_province: geo.state_province || "",
+      city: resolveCityName(geo),
+      postcode: geo.postcode || "",
+      timezone: geo.timezone || ""
     });
   }
 }
+
 
 let playerInterval = null;
 
@@ -248,16 +275,29 @@ function attachPlayerEventListeners(player) {
     if (event.data === YT.PlayerState.PLAYING) {
       trackVideoInteraction("play", { video_watch_percentage: percentage });
       startTrackingPlayerProgress(player);
-    } else if (event.data === YT.PlayerState.PAUSED) {
+    } 
+    else if (event.data === YT.PlayerState.PAUSED) {
       trackVideoInteraction("pause", { video_watch_percentage: percentage });
-    } else if (event.data === YT.PlayerState.ENDED) {
+    } 
+    else if (event.data === YT.PlayerState.ENDED) {
       if (!videoCompletedSession[window.currentVideoId]) {
         trackVideoInteraction("video_completed", { video_watch_percentage: 100 });
         videoCompletedSession[window.currentVideoId] = true;
       }
     }
   });
+
+  // ✅ Deteksi fullscreen
+  document.addEventListener("fullscreenchange", () => {
+    const percentage = Math.floor((player.getCurrentTime() / player.getDuration()) * 100);
+    if (document.fullscreenElement) {
+      trackVideoInteraction("enter_fullscreen", { video_watch_percentage: percentage });
+    } else {
+      trackVideoInteraction("exit_fullscreen", { video_watch_percentage: percentage });
+    }
+  });
 }
+
 
 function logUserBehavior(eventName, detail1 = "", detail2 = "") {
   const user = firebase.auth().currentUser || null;
