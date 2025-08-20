@@ -52,11 +52,20 @@ async function getUserLocation() {
                     locationCache = {
                         latitude,
                         longitude,
+                        continent: address.continent || "",
                         country: address.country || "",
+                        country_code: address.country_code || "",
                         state_province: address.state || "",
-                        // ✅ Prioritaskan kabupaten/kota daripada desa/kelurahan
-                        city: address.city || address.county || address.town || address.municipality || address.village || "",
+                        region: address.region || "",
+                        county: address.county || "",
+                        city: address.city || "",
+                        municipality: address.municipality || "",
+                        town: address.town || "",
+                        village: address.village || "",
+                        suburb: address.suburb || "",
+                        road: address.road || "",
                         postcode: address.postcode || "",
+                        display_name: data.display_name || "",
                         timezone
                     };
 

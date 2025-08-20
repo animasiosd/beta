@@ -322,6 +322,7 @@ function attachPlayerEventListeners(player) {
 }
 
 
+
 function logUserBehavior(eventName, detail1 = "", detail2 = "") {
   const user = firebase.auth().currentUser || null;
 
