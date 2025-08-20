@@ -1,104 +1,83 @@
-const CACHE_VERSION = 'v3';
-const CACHE_NAME = `cerita-bahasa-cache-${CACHE_VERSION}`;
+// === [1] Deteksi Base Path Otomatis ===
+const BASE_PATH = self.location.pathname.includes('/beta/')
+  ? '/beta/'
+  : '/cerita-bahasa-daerah/';
 
-// Deteksi apakah website ini di /beta/ atau /
-const BASE_PATH = self.location.pathname.includes('/beta/') ? '/beta/' : '/';
+// === [2] Versi Cache ===
+const CACHE_NAME = `cerita-bahasa-cache-v${BASE_PATH === '/beta/' ? 'beta' : 'main'}-v1`;
 
-// Semua file penting yang harus di-cache untuk PWA
+// === [3] Daftar File untuk di-cache ===
 const urlsToCache = [
-  BASE_PATH,
-  BASE_PATH + 'index.html',
-  BASE_PATH + 'halaman-bahasa.html',
-  BASE_PATH + 'navbar.html',
-  BASE_PATH + 'manifest.json',
-  BASE_PATH + 'css/style.css',
-  BASE_PATH + 'js/auth.js',
-  BASE_PATH + 'js/main.js',
-  BASE_PATH + 'js/video.js',
-  BASE_PATH + 'js/comments.js',
-  BASE_PATH + 'js/analytics.js',
-  BASE_PATH + 'js/geotracker.js',
-  BASE_PATH + 'assets/favicon.png',
-  BASE_PATH + 'assets/favicon-192.png',
-  BASE_PATH + 'assets/favicon-512.png'
+  `${BASE_PATH}`,
+  `${BASE_PATH}index.html`,
+  `${BASE_PATH}halaman-bahasa.html`,
+  `${BASE_PATH}css/style.css`,
+  `${BASE_PATH}js/auth.js`,
+  `${BASE_PATH}js/main.js`,
+  `${BASE_PATH}js/video.js`,
+  `${BASE_PATH}js/comments.js`,
+  `${BASE_PATH}js/analytics.js`,
+  `${BASE_PATH}assets/favicon-192.png`,
+  `${BASE_PATH}assets/favicon-512.png`
 ];
 
-// URL fallback ketika offline
-const OFFLINE_URL = BASE_PATH + 'index.html';
-
-// Service Worker: INSTALL
+// === [4] Instalasi Service Worker ===
 self.addEventListener('install', event => {
-  console.log('[SW] Installing Service Worker...');
-
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Caching files:', urlsToCache);
         return cache.addAll(urlsToCache);
       })
-      .catch(err => console.error('[SW] Cache addAll failed:', err))
+      .catch(err => {
+        console.warn('Beberapa file gagal dicache:', err);
+      })
   );
-
-  // Langsung aktifkan SW terbaru
   self.skipWaiting();
 });
 
-// Service Worker: ACTIVATE
+// === [5] Aktivasi Service Worker & Hapus Cache Lama ===
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating Service Worker...');
-
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames
-          .filter(name => name !== CACHE_NAME)
-          .map(name => {
-            console.log('[SW] Deleting old cache:', name);
-            return caches.delete(name);
-          })
+          .filter(name => name.startsWith('cerita-bahasa-cache') && name !== CACHE_NAME)
+          .map(name => caches.delete(name))
       );
     })
   );
-
   self.clients.claim();
 });
 
-// Service Worker: FETCH
+// === [6] Fetch Request ===
 self.addEventListener('fetch', event => {
-  // Abaikan permintaan ke Firebase Auth agar tidak error
-  if (event.request.url.includes('https://securetoken.googleapis.com') ||
-      event.request.url.includes('https://www.googleapis.com') ||
-      event.request.url.includes('https://apis.google.com')) {
-    return;
-  }
-
   event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        // Jika ada di cache → pakai cache
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+    caches.match(event.request).then(response => {
+      // Jika file ada di cache → gunakan cache
+      if (response) return response;
 
-        // Kalau tidak ada → ambil dari network dan cache hasilnya
-        return fetch(event.request)
-          .then(networkResponse => {
-            // Jangan cache jika bukan file GET atau error
-            if (!networkResponse || networkResponse.status !== 200 || event.request.method !== 'GET') {
-              return networkResponse;
-            }
-
-            return caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, networkResponse.clone());
-              return networkResponse;
+      // Jika tidak ada di cache → ambil dari network
+      return fetch(event.request)
+        .then(networkResponse => {
+          // Simpan file baru ke cache jika berhasil diambil
+          if (
+            networkResponse &&
+            networkResponse.status === 200 &&
+            networkResponse.type === 'basic'
+          ) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
             });
-          })
-          .catch(() => {
-            // Fallback ke offline page kalau gagal fetch
-            if (event.request.mode === 'navigate') {
-              return caches.match(OFFLINE_URL);
-            }
-          });
-      })
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // Fallback → jika gagal ambil file dan offline
+          if (event.request.mode === 'navigate') {
+            return caches.match(`${BASE_PATH}index.html`);
+          }
+        });
+    })
   );
 });

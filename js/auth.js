@@ -23,7 +23,8 @@ function toggleNavbarVisibility(user) {
       .then(res => res.text())
       .then(html => {
         navbarPlaceholder.innerHTML = html;
-      });
+      })
+      .catch(err => console.error("Gagal memuat navbar:", err));
   }
 }
 
