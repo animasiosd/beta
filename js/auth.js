@@ -77,42 +77,54 @@ document.addEventListener('DOMContentLoaded', () => {
   if (loginBtn) {
     loginBtn.onclick = () => {
       logUserBehavior("login_button");
+      // Simpan halaman asal ke localStorage
+      localStorage.setItem("redirectAfterLogin", window.location.href);
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithRedirect(provider).catch(error => {
+    auth.signInWithRedirect(provider).catch(error => {
         console.error("Login Gagal:", error);
         showLoginFailModal();
-      });
-    };
+    });
+};
   }
 
   // 5️⃣ Tangani hasil redirect
   auth.getRedirectResult()
-    .then(result => {
-      if (result.user) {
-        console.log("Login berhasil via redirect:", result.user.displayName);
-      }
-    })
-    .catch(error => {
-      console.error("Error redirect:", error);
-      showLoginFailModal();
-    });
+  .then(result => {
+    if (result.user) {
+        console.log("Login berhasil:", result.user.displayName);
+
+        // Ambil URL halaman asal dari localStorage
+        const redirectUrl = localStorage.getItem("redirectAfterLogin");
+
+        if (redirectUrl) {
+            // Hapus dari storage agar tidak nyangkut di login berikutnya
+            localStorage.removeItem("redirectAfterLogin");
+            window.location.href = redirectUrl;
+        }
+    }
+  })
+  .catch(error => {
+    console.error("Error redirect:", error);
+    showLoginFailModal();
+  });
 
   // 6️⃣ Pantau perubahan status login
   auth.onAuthStateChanged(user => {
     toggleNavbarVisibility(user);
 
-    if (pageLoader) pageLoader.classList.add('d-none'); // atau gunakan animasi loader
-    if (user) {
-      if (mainContent) mainContent.classList.remove('d-none');
-      if (loginContainer) loginContainer.classList.add('d-none');
+    if (pageLoader) pageLoader.classList.add('d-none');
 
-      const welcomeMessage = document.getElementById("welcome-text");
-      if (welcomeMessage && user.displayName) {
-        welcomeMessage.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
-      }
+    if (user) {
+        if (mainContent) mainContent.classList.remove('d-none');
+        if (loginContainer) loginContainer.classList.add('d-none');
+
+        const welcomeMessage = document.getElementById("welcome-text");
+        if (welcomeMessage && user.displayName) {
+            welcomeMessage.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
+        }
     } else {
-      if (loginContainer) loginContainer.classList.remove('d-none');
-      if (mainContent) mainContent.classList.add('d-none');
+        if (loginContainer) loginContainer.classList.remove('d-none');
+        if (mainContent) mainContent.classList.add('d-none');
     }
-  });
+});
 });
