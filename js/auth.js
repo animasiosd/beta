@@ -12,11 +12,20 @@ const auth = firebase.auth();
 
 // ▼▼▼ Fungsi untuk menampilkan navbar jika user login
 function toggleNavbarVisibility(user) {
-  const navbarPlaceholder = document.getElementById('navbar-placeholder');
-  if (navbarPlaceholder) {
-    navbarPlaceholder.style.display = user ? 'block' : 'none';
-  }
+    const navbarPlaceholder = document.getElementById('navbar-placeholder');
+    if (navbarPlaceholder) {
+        navbarPlaceholder.style.display = user ? 'block' : 'none';
+    }
+    // Jika user login, pastikan navbar dimuat ulang
+    if (user && !document.querySelector("#languagesDropdown")) {
+        fetch("navbar.html")
+            .then(res => res.text())
+            .then(html => {
+                navbarPlaceholder.innerHTML = html;
+            });
+    }
 }
+
 
 // 2️⃣ Fungsi Logout
 function logout() {
@@ -62,7 +71,7 @@ function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
 document.addEventListener('DOMContentLoaded', () => {
   const pageLoader = document.getElementById("page-loader");
   const loginContainer = document.getElementById("loginContainer");
-  const mainContent = document.getElementById("main-content"); // ✅ pastikan id sama dengan HTML
+  const mainContent = document.getElementById("mainContent"); // ✅ pastikan id sama dengan HTML
 
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
