@@ -55,8 +55,7 @@ async function getUserLocation() {
                         continent: address.continent || "",
                         country: address.country || "",
                         country_code: address.country_code || "",
-                        state_province: address.state || "",
-                        region: address.region || "",
+                        state: address.state || "",
                         county: address.county || "",
                         city: address.city || "",
                         municipality: address.municipality || "",
@@ -68,6 +67,7 @@ async function getUserLocation() {
                         display_name: data.display_name || "",
                         timezone
                     };
+
 
                     resolve(locationCache);
                 } catch (error) {
