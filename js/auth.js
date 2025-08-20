@@ -10,12 +10,14 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// Navbar otomatis dimuat saat login
+// 2️⃣ Navbar otomatis dimuat saat login
 function toggleNavbarVisibility(user) {
   const navbarPlaceholder = document.getElementById('navbar-placeholder');
-  if (navbarPlaceholder) {
-    navbarPlaceholder.style.display = user ? 'block' : 'none';
-  }
+  if (!navbarPlaceholder) return;
+
+  navbarPlaceholder.style.display = user ? 'block' : 'none';
+
+  // Jika user login dan navbar belum dimuat, ambil navbar.html
   if (user && !document.querySelector("#languagesDropdown")) {
     fetch("navbar.html")
       .then(res => res.text())
@@ -25,7 +27,7 @@ function toggleNavbarVisibility(user) {
   }
 }
 
-// 2️⃣ Logout
+// 3️⃣ Fungsi Logout
 function logout() {
   try { logUserBehavior("logout_button"); } catch {}
   auth.signOut().then(() => {
@@ -35,39 +37,7 @@ function logout() {
   });
 }
 
-// Login dengan Google Redirect
-document.addEventListener('DOMContentLoaded', () => {
-  const loginContainer = document.getElementById("loginContainer");
-  const pageLoader = document.getElementById("page-loader");
-  const mainContent = document.getElementById("mainContent");
-  const loginBtn = document.getElementById("loginBtn");
-
-  // Tombol Login
-  if (loginBtn) {
-    loginBtn.onclick = () => {
-      logUserBehavior("login_button");
-      localStorage.setItem("redirectAfterLogin", window.location.href);
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithRedirect(provider).catch(error => {
-        console.error("Login Gagal:", error);
-      });
-    };
-  }
-
-  // Tangani hasil redirect
-  auth.getRedirectResult()
-    .then(result => {
-      if (result.user) {
-        const redirectUrl = localStorage.getItem("redirectAfterLogin");
-        if (redirectUrl) {
-          localStorage.removeItem("redirectAfterLogin");
-          window.location.href = redirectUrl;
-        }
-      }
-    })
-    .catch(error => console.error("Error redirect:", error));
-
-// 3️⃣ Modal Login Gagal (fallback jika bootstrap belum siap)
+// 4️⃣ Modal Login Gagal (Fallback jika Bootstrap belum siap)
 function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
   let existingModal = document.getElementById("loginFailModal");
   if (existingModal) existingModal.remove();
@@ -97,7 +67,6 @@ function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
     if (window.bootstrap && bootstrap.Modal) {
       new bootstrap.Modal(modalDiv).show();
     } else {
-      // fallback sederhana
       modalDiv.classList.add('show');
       modalDiv.style.display = 'block';
       modalDiv.setAttribute('aria-modal', 'true');
@@ -108,14 +77,50 @@ function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
   }
 }
 
-  // 6️⃣ Update UI berdasar status login (tanpa paksa pindah halaman)
+// 5️⃣ Login dengan Google Popup
+document.addEventListener('DOMContentLoaded', () => {
+  const loginContainer = document.getElementById("loginContainer");
+  const pageLoader = document.getElementById("page-loader");
+  const mainContent = document.getElementById("mainContent");
+  const loginBtn = document.getElementById("loginBtn");
+
+  // Tombol Login dengan Popup
+  if (loginBtn) {
+    loginBtn.onclick = () => {
+      try { logUserBehavior("login_button"); } catch {}
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      auth.signInWithPopup(provider)
+        .then(result => {
+          const user = result.user;
+          console.log("Login berhasil:", user.displayName);
+
+          // Update UI setelah login sukses
+          toggleNavbarVisibility(user);
+
+          if (mainContent) mainContent.classList.remove('d-none');
+          if (loginContainer) loginContainer.classList.add('d-none');
+
+          const welcomeMessage = document.getElementById("welcome-text");
+          if (welcomeMessage && user.displayName) {
+            welcomeMessage.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
+          }
+        })
+        .catch(error => {
+          console.error("Login Gagal:", error);
+          showLoginFailModal(error.message);
+        });
+    };
+  }
+
+  // 6️⃣ Update UI otomatis berdasar status login
   auth.onAuthStateChanged(user => {
     toggleNavbarVisibility(user);
 
     if (pageLoader) pageLoader.classList.add('d-none');
 
     if (user) {
-      if (mainContent)    mainContent.classList.remove('d-none');
+      if (mainContent) mainContent.classList.remove('d-none');
       if (loginContainer) loginContainer.classList.add('d-none');
 
       const welcomeMessage = document.getElementById("welcome-text");
@@ -124,7 +129,7 @@ function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
       }
     } else {
       if (loginContainer) loginContainer.classList.remove('d-none');
-      if (mainContent)    mainContent.classList.add('d-none');
+      if (mainContent) mainContent.classList.add('d-none');
     }
   });
 });
