@@ -10,26 +10,15 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// ▼▼▼ Fungsi untuk menampilkan navbar jika user login
+// ▼▼▼ Tampilkan/sembunyikan navbar (tanpa fetch ulang)
 function toggleNavbarVisibility(user) {
-    const navbarPlaceholder = document.getElementById('navbar-placeholder');
-    if (navbarPlaceholder) {
-        navbarPlaceholder.style.display = user ? 'block' : 'none';
-    }
-    // Jika user login, pastikan navbar dimuat ulang
-    if (user && !document.querySelector("#languagesDropdown")) {
-        fetch("navbar.html")
-            .then(res => res.text())
-            .then(html => {
-                navbarPlaceholder.innerHTML = html;
-            });
-    }
+  const ph = document.getElementById('navbar-placeholder');
+  if (ph) ph.style.display = user ? 'block' : 'none';
 }
 
-
-// 2️⃣ Fungsi Logout
+// 2️⃣ Logout
 function logout() {
-  logUserBehavior("logout_button"); // analytics
+  try { logUserBehavior("logout_button"); } catch {}
   auth.signOut().then(() => {
     window.location.href = 'index.html';
   }).catch(error => {
@@ -37,7 +26,7 @@ function logout() {
   });
 }
 
-// 3️⃣ Modal Login Gagal
+// 3️⃣ Modal Login Gagal (fallback jika bootstrap belum siap)
 function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
   let existingModal = document.getElementById("loginFailModal");
   if (existingModal) existingModal.remove();
@@ -63,68 +52,80 @@ function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
   `;
   document.body.appendChild(modalDiv);
 
-  const bsModal = new bootstrap.Modal(modalDiv);
-  bsModal.show();
+  try {
+    if (window.bootstrap && bootstrap.Modal) {
+      new bootstrap.Modal(modalDiv).show();
+    } else {
+      // fallback sederhana
+      modalDiv.classList.add('show');
+      modalDiv.style.display = 'block';
+      modalDiv.setAttribute('aria-modal', 'true');
+      modalDiv.removeAttribute('aria-hidden');
+    }
+  } catch (e) {
+    console.error("Gagal menampilkan modal:", e);
+  }
 }
 
-// 4️⃣ Login dengan Redirect
+// 4️⃣ Login dengan Redirect + kembali ke halaman asal
 document.addEventListener('DOMContentLoaded', () => {
-  const pageLoader = document.getElementById("page-loader");
+  const pageLoader     = document.getElementById("page-loader");
   const loginContainer = document.getElementById("loginContainer");
-  const mainContent = document.getElementById("mainContent"); // ✅ pastikan id sama dengan HTML
+  const mainContent    = document.getElementById("mainContent");
+  const loginBtn       = document.getElementById("loginBtn");
 
-  const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
     loginBtn.onclick = () => {
-      logUserBehavior("login_button");
-      // Simpan halaman asal ke localStorage
+      try { logUserBehavior("login_button"); } catch {}
+      // Simpan halaman asal
       localStorage.setItem("redirectAfterLogin", window.location.href);
       const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithRedirect(provider).catch(error => {
+      auth.signInWithRedirect(provider).catch(error => {
         console.error("Login Gagal:", error);
         showLoginFailModal();
-    });
-};
+      });
+    };
   }
 
   // 5️⃣ Tangani hasil redirect
   auth.getRedirectResult()
-  .then(result => {
-    if (result.user) {
+    .then(result => {
+      if (result.user) {
         console.log("Login berhasil:", result.user.displayName);
 
-        // Ambil URL halaman asal dari localStorage
         const redirectUrl = localStorage.getItem("redirectAfterLogin");
+        localStorage.removeItem("redirectAfterLogin");
 
-        if (redirectUrl) {
-            // Hapus dari storage agar tidak nyangkut di login berikutnya
-            localStorage.removeItem("redirectAfterLogin");
-            window.location.href = redirectUrl;
+        // Jika ada halaman asal dan berbeda dengan halaman saat ini → kembali ke sana
+        if (redirectUrl && redirectUrl !== window.location.href) {
+          window.location.replace(redirectUrl);
+          return; // hentikan eksekusi lanjutan di halaman ini
         }
-    }
-  })
-  .catch(error => {
-    console.error("Error redirect:", error);
-    showLoginFailModal();
-  });
+        // Jika sama, biarkan onAuthStateChanged yang update UI
+      }
+    })
+    .catch(error => {
+      console.error("Error redirect:", error);
+      showLoginFailModal();
+    });
 
-  // 6️⃣ Pantau perubahan status login
+  // 6️⃣ Update UI berdasar status login (tanpa paksa pindah halaman)
   auth.onAuthStateChanged(user => {
     toggleNavbarVisibility(user);
 
     if (pageLoader) pageLoader.classList.add('d-none');
 
     if (user) {
-        if (mainContent) mainContent.classList.remove('d-none');
-        if (loginContainer) loginContainer.classList.add('d-none');
+      if (mainContent)    mainContent.classList.remove('d-none');
+      if (loginContainer) loginContainer.classList.add('d-none');
 
-        const welcomeMessage = document.getElementById("welcome-text");
-        if (welcomeMessage && user.displayName) {
-            welcomeMessage.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
-        }
+      const welcomeMessage = document.getElementById("welcome-text");
+      if (welcomeMessage && user.displayName) {
+        welcomeMessage.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
+      }
     } else {
-        if (loginContainer) loginContainer.classList.remove('d-none');
-        if (mainContent) mainContent.classList.add('d-none');
+      if (loginContainer) loginContainer.classList.remove('d-none');
+      if (mainContent)    mainContent.classList.add('d-none');
     }
-});
+  });
 });

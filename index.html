@@ -17,7 +17,6 @@
     #loader-text { color:#555; margin-top:20px; font-size:1.2em; }
     .progress-container { width:80%; max-width:400px; background:#e0e0e0; border-radius:25px; overflow:hidden; }
     #progress-bar { width:0%; height:20px; background:#0d6efd; border-radius:25px; transition:width 0.1s linear; }
-    #mainContent, #loginContainer { display:none; padding:40px; text-align:center; }
     #loginContainer { justify-content:center; align-items:center; height:100vh; }
     /* Pop-up PWA */
     #installPopup {
@@ -64,7 +63,7 @@
   <div id="loader-text">Memuat... 0%</div>
 </div>
 
-<div id="loginContainer" class="d-flex">
+<div id="loginContainer" class="d-none d-flex">
   <div class="text-center">
       <h1>Selamat Datang di Cerita Bahasa Daerah Beta Version</h1>
       <p class="mb-4">Silakan masuk untuk melanjutkan.</p>
@@ -72,7 +71,7 @@
   </div>
 </div>
 
-<div id="mainContent">
+<div id="mainContent" class="d-none"> </div>
   <header>
     <h1 id="welcome-text">🎉 Selamat Datang! (Beta Version)</h1>
     <p>Mau dengar cerita dari mana? Pilih bahasanya di tombol <strong>Pilih Bahasa</strong> ↗️</p>
@@ -99,14 +98,6 @@
 
 <script>
 let deferredPrompt;
-
-// Load navbar dinamis
-fetch('navbar.html')
-  .then(res => res.text())
-  .then(html => {
-    document.getElementById('navbar-placeholder').innerHTML = html;
-    setupManualInstallButton(); // pasang event listener setelah navbar muncul
-  });
 
 // Fungsi cek apakah PWA sudah diinstall
 function isAppInstalled() {
@@ -181,23 +172,6 @@ window.addEventListener('mousemove', e => {
 window.addEventListener('mouseup', () => {
   isDragging = false;
   installPopup.style.cursor = 'grab';
-});
-
-// Firebase Auth
-firebase.auth().onAuthStateChanged(function(user) {
-  const mainContent = document.getElementById("mainContent");
-  const loginContainer = document.getElementById("loginContainer");
-  const welcomeText = document.getElementById("welcome-text");
-
-  if (user) {
-    const name = user.displayName || "Pengguna";
-    if (welcomeText) welcomeText.textContent = `🎉 Selamat Datang, ${name}!`;
-    mainContent.style.display = "block";
-    loginContainer.style.display = "none";
-  } else {
-    loginContainer.style.display = "flex";
-    mainContent.style.display = "none";
-  }
 });
 
 // Page loader
