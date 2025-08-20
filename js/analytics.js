@@ -1,4 +1,5 @@
-// File: js/analytics.js sudah berhasil 3 yaitu sheet user_list, user_per_page
+// File: js/analytics.js
+// ✅ Versi final – fix integrasi geoTracker.js tanpa ubah struktur utama
 
 const ANALYTICS_WEB_APP = "https://script.google.com/macros/s/AKfycbxm5YQAB2kify_9SzPph5xgaEMlsKpE8UNfrPuvmghgDM9meNKCiDPABKHJ4a4p3Nak/exec";
 const videoProgressSession = {};
@@ -124,6 +125,17 @@ function sendVideoInteraction(data) {
     video_watch_percentage: data.video_watch_percentage || "",
     video_completed: data.video_completed || ""
   });
+
+  // ✅ Integrasi geoTracker.js — kirim lokasi video
+  sendGeoVideoInteraction({
+    video_id: data.video_id,
+    video_title: data.video_title,
+    nama_bahasa: data.nama_bahasa,
+    interaction_type: data.interaction_type,
+    comment_id: data.comment_id || "",
+    video_watch_percentage: data.video_watch_percentage || "",
+    video_completed: data.video_completed || ""
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -167,6 +179,16 @@ function trackWatchProgress(currentTime, duration) {
       video_watch_percentage: percentage,
       video_completed: ""
     });
+
+    // ✅ Kirim geoTracker progress
+    sendGeoVideoInteraction({
+      video_id: videoId,
+      video_title: title,
+      nama_bahasa: language,
+      interaction_type: "progress_update",
+      video_watch_percentage: percentage,
+      video_completed: ""
+    });
   }
 
   if (isCompleted && !videoCompletedSession[videoId]) {
@@ -181,6 +203,16 @@ function trackWatchProgress(currentTime, duration) {
       video_title: title,
       interaction_type: "video_completed",
       comment_id: "",
+      video_watch_percentage: percentage,
+      video_completed: "yes"
+    });
+
+    // ✅ Kirim geoTracker video_completed
+    sendGeoVideoInteraction({
+      video_id: videoId,
+      video_title: title,
+      nama_bahasa: language,
+      interaction_type: "video_completed",
       video_watch_percentage: percentage,
       video_completed: "yes"
     });
@@ -206,10 +238,14 @@ function attachPlayerEventListeners(player) {
 
     if (event.data === YT.PlayerState.PLAYING) {
       trackVideoInteraction("play", { video_watch_percentage: percentage });
+      startTrackingPlayerProgress(player);
     } else if (event.data === YT.PlayerState.PAUSED) {
       trackVideoInteraction("pause", { video_watch_percentage: percentage });
     } else if (event.data === YT.PlayerState.ENDED) {
-      trackVideoInteraction("ended", { video_watch_percentage: percentage });
+      if (!videoCompletedSession[window.currentVideoId]) {
+        trackVideoInteraction("video_completed", { video_watch_percentage: 100 });
+        videoCompletedSession[window.currentVideoId] = true;
+      }
     }
   });
 }
@@ -233,7 +269,7 @@ function logDownloadPageInteraction(action_type, action_key = "", action_value =
   if (!user) return;
 
   const payload = {
-    eventType: "DOWNLOAD_INTERACTION",  // 🔑 penting biar masuk switch doPost
+    eventType: "DOWNLOAD_INTERACTION",
     data: {
       timestamp: getFormattedTimestampWIB(),
       user_id: user.uid,
@@ -250,4 +286,3 @@ function logDownloadPageInteraction(action_type, action_key = "", action_value =
     body: JSON.stringify(payload),
   }).catch(err => console.error("logDownloadPageInteraction error:", err));
 }
-
