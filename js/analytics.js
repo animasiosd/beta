@@ -113,9 +113,13 @@ function trackVideoInteraction(interactionType, additionalData = {}) {
 }
 
 /**
- * Kirim data interaksi video standar tanpa lokasi
+ * Kirim data interaksi video dengan dukungan geoTracker.js
+ * Otomatis menyertakan lokasi jika tersedia
  */
 function sendVideoInteraction(data) {
+  // Ambil data lokasi terbaru dari geoTracker.js
+  const geo = window.latestGeoData || {};
+
   sendAnalyticsEvent("VIDEO_INTERACTION", {
     interaction_timestamp: getFormattedTimestampWIB(),
     user_id: data.user_id,
@@ -126,33 +130,16 @@ function sendVideoInteraction(data) {
     interaction_type: data.interaction_type,
     comment_id: data.comment_id || "",
     video_watch_percentage: data.video_watch_percentage || "",
-    video_completed: data.video_completed || ""
-  });
-}
+    video_completed: data.video_completed || "",
 
-/**
- * ✅ Fungsi baru untuk integrasi geoTracker.js
- * Dipanggil langsung oleh geotracker.js → mengirim data lokasi + video ke Google Sheets
- */
-function sendVideoInteractionToAnalytics(enrichedData) {
-  sendAnalyticsEvent("VIDEO_INTERACTION", {
-    interaction_timestamp: getFormattedTimestampWIB(),
-    user_id: enrichedData.user_id,
-    user_name: enrichedData.user_name,
-    nama_bahasa: enrichedData.nama_bahasa,
-    video_id: enrichedData.video_id,
-    video_title: enrichedData.video_title,
-    interaction_type: enrichedData.interaction_type,
-    comment_id: enrichedData.comment_id || "",
-    video_watch_percentage: enrichedData.video_watch_percentage || "",
-    video_completed: enrichedData.video_completed || "",
-    latitude: enrichedData.latitude || "",
-    longitude: enrichedData.longitude || "",
-    country: enrichedData.country || "",
-    state_province: enrichedData.state_province || "",
-    city: enrichedData.city || "",
-    postcode: enrichedData.postcode || "",
-    timezone: enrichedData.timezone || ""
+    // ✅ Data lokasi (ambil dari geoTracker jika ada)
+    latitude: geo.latitude || "",
+    longitude: geo.longitude || "",
+    country: geo.country || "",
+    state_province: geo.state_province || "",
+    city: geo.city || "",
+    postcode: geo.postcode || "",
+    timezone: geo.timezone || ""
   });
 }
 

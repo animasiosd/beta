@@ -113,20 +113,14 @@ async function trackVideoLocationInteraction(interactionData) {
     }
 }
 
-/**
- * Pasang event listener untuk video
- * Jalankan tracking hanya saat user menekan tombol play pertama kali
- */
-document.addEventListener("DOMContentLoaded", () => {
-    const ytPlayerPlaceholder = document.querySelector("#yt-player-placeholder");
-
-    if (ytPlayerPlaceholder) {
-        ytPlayerPlaceholder.addEventListener("video_play", async (event) => {
-            // Data interaksi awal dari event
-            const interactionData = event.detail;
-
-            // Panggil tracking lokasi + analytics
-            await trackVideoLocationInteraction(interactionData);
-        });
+// ✅ Ambil lokasi user otomatis sekali saat halaman dimuat
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const location = await getUserLocation();
+        window.latestGeoData = location; // Simpan global agar analytics.js bisa akses
+        console.log("[GeoTracker] Lokasi tersimpan:", location);
+    } catch (error) {
+        console.warn("[GeoTracker] Gagal ambil lokasi:", error);
+        window.latestGeoData = {}; // Pastikan tidak undefined
     }
 });
