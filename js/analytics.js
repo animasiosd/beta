@@ -1,9 +1,40 @@
 // File: js/analytics.js
-// ✅ Versi final – fix integrasi geoTracker.js dengan sendVideoInteractionToAnalytics()
+// ✅ Versi final – fix integrasi geoTracker.js
 
 const ANALYTICS_WEB_APP = "https://script.google.com/macros/s/AKfycbxm5YQAB2kify_9SzPph5xgaEMlsKpE8UNfrPuvmghgDM9meNKCiDPABKHJ4a4p3Nak/exec";
 const videoProgressSession = {};
 const videoCompletedSession = {};
+
+/**
+ * Format nama kota/kabupaten secara dinamis
+ * - Kalau ada city → pakai langsung (contoh: "Semarang")
+ * - Kalau ada county → cek apakah sudah ada "Kabupaten", kalau belum → tambahkan "Kab."
+ * - Kalau ada town/municipality/village → fallback terakhir
+ */
+function resolveCityName(address) {
+  if (!address) return "";
+
+  // Kota besar → langsung pakai nama city
+  if (address.city) {
+    return address.city; // contoh: "Semarang"
+  }
+
+  // Kalau tidak ada city, tapi ada county → biasanya kabupaten
+  if (address.county) {
+    if (/Kabupaten/i.test(address.county)) {
+      return address.county; // contoh: "Kabupaten Semarang"
+    } else {
+      return `Kab. ${address.county}`; // contoh: "Kab. Semarang"
+    }
+  }
+
+  // Fallback: town, municipality, village
+  if (address.town) return address.town;
+  if (address.municipality) return address.municipality;
+  if (address.village) return address.village;
+
+  return "";
+}
 
 function getDeviceInfo() {
   const ua = navigator.userAgent;
@@ -122,24 +153,22 @@ function sendVideoInteraction(data) {
 
   sendAnalyticsEvent("VIDEO_INTERACTION", {
     interaction_timestamp: getFormattedTimestampWIB(),
-    user_id: data.user_id,
-    user_name: data.user_name,
-    nama_bahasa: data.nama_bahasa,
-    video_id: data.video_id,
-    video_title: data.video_title,
-    interaction_type: data.interaction_type,
-    comment_id: data.comment_id || "",
-    video_watch_percentage: data.video_watch_percentage || "",
-    video_completed: data.video_completed || "",
-
-    // ✅ Data lokasi (ambil dari geoTracker jika ada)
-    latitude: geo.latitude || "",
-    longitude: geo.longitude || "",
-    country: geo.country || "",
-    state_province: geo.state_province || "",
-    city: geo.city || "",
-    postcode: geo.postcode || "",
-    timezone: geo.timezone || ""
+    user_id: enrichedData.user_id,
+    user_name: enrichedData.user_name,
+    nama_bahasa: enrichedData.nama_bahasa,
+    video_id: enrichedData.video_id,
+    video_title: enrichedData.video_title,
+    interaction_type: enrichedData.interaction_type,
+    comment_id: enrichedData.comment_id || "",
+    video_watch_percentage: enrichedData.video_watch_percentage || "",
+    video_completed: enrichedData.video_completed || "",
+    latitude: geo.latitude || enrichedData.latitude || "",
+    longitude: geo.longitude || enrichedData.longitude || "",
+    country: geo.country || enrichedData.country || "",
+    state_province: geo.state_province || enrichedData.state_province || "",
+    city: resolveCityName(geo) || resolveCityName(enrichedData) || "",
+    postcode: geo.postcode || enrichedData.postcode || "",
+    timezone: geo.timezone || enrichedData.timezone || ""
   });
 }
 

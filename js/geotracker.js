@@ -54,7 +54,8 @@ async function getUserLocation() {
                         longitude,
                         country: address.country || "",
                         state_province: address.state || "",
-                        city: address.city || address.town || address.village || "",
+                        // ✅ Prioritaskan kabupaten/kota daripada desa/kelurahan
+                        city: address.city || address.county || address.town || address.municipality || address.village || "",
                         postcode: address.postcode || "",
                         timezone
                     };
