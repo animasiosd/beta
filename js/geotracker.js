@@ -68,7 +68,6 @@ async function getUserLocation() {
                         timezone
                     };
 
-
                     resolve(locationCache);
                 } catch (error) {
                     console.error("Gagal mengambil lokasi:", error);
@@ -128,7 +127,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         const location = await getUserLocation();
         window.latestGeoData = location; // Simpan global agar analytics.js bisa akses
-        console.log("[GeoTracker] Lokasi tersimpan:", location);
     } catch (error) {
         console.warn("[GeoTracker] Gagal ambil lokasi:", error);
         window.latestGeoData = {}; // Pastikan tidak undefined
