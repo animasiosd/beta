@@ -131,7 +131,6 @@ function trackVideoInteraction(interactionType, additionalData = {}) {
   const videoTitle = document.getElementById("videoTitle")?.textContent || "Tanpa Judul";
   const language = window.currentLanguagePage || null;
   const videoId = window.currentVideoId || null;
-  const geo = window.latestGeoData || {};
 
   sendVideoInteraction({
     user_id: user ? user.uid : "ANONYM",
@@ -140,26 +139,40 @@ function trackVideoInteraction(interactionType, additionalData = {}) {
     video_id: videoId,
     video_title: videoTitle,
     interaction_type: interactionType,
-    latitude: geo.latitude || "",
-    longitude: geo.longitude || "",
-    country: geo.country || "",
-    state_province: geo.state_province || "",
-    city: resolveCityName(geo),
-    postcode: geo.postcode || "",
-    timezone: geo.timezone || "",
     ...additionalData
   });
 }
-
 
 /**
  * Kirim data interaksi video dengan dukungan geoTracker.js
  * Otomatis menyertakan lokasi jika tersedia
  */
 function sendVideoInteraction(data) {
-  // Ambil data lokasi terbaru dari geoTracker.js
+  // Ambil lokasi terbaru dari geotracker.js kalau ada
   const geo = window.latestGeoData || {};
 
+  sendAnalyticsEvent("VIDEO_INTERACTION", {
+    interaction_timestamp: getFormattedTimestampWIB(),
+    user_id: data.user_id,
+    user_name: data.user_name,
+    nama_bahasa: data.nama_bahasa,
+    video_id: data.video_id,
+    video_title: data.video_title,
+    interaction_type: data.interaction_type,
+    comment_id: data.comment_id || "",
+    video_watch_percentage: data.video_watch_percentage || "",
+    video_completed: data.video_completed || "",
+    latitude: geo.latitude || "",
+    longitude: geo.longitude || "",
+    country: geo.country || "",
+    state_province: geo.state_province || "",
+    city: geo.city || "",
+    postcode: geo.postcode || "",
+    timezone: geo.timezone || ""
+  });
+}
+
+function sendVideoInteractionToAnalytics(enrichedData) {
   sendAnalyticsEvent("VIDEO_INTERACTION", {
     interaction_timestamp: getFormattedTimestampWIB(),
     user_id: enrichedData.user_id,
@@ -171,13 +184,13 @@ function sendVideoInteraction(data) {
     comment_id: enrichedData.comment_id || "",
     video_watch_percentage: enrichedData.video_watch_percentage || "",
     video_completed: enrichedData.video_completed || "",
-    latitude: geo.latitude || enrichedData.latitude || "",
-    longitude: geo.longitude || enrichedData.longitude || "",
-    country: geo.country || enrichedData.country || "",
-    state_province: geo.state_province || enrichedData.state_province || "",
-    city: resolveCityName(geo) || resolveCityName(enrichedData) || "",
-    postcode: geo.postcode || enrichedData.postcode || "",
-    timezone: geo.timezone || enrichedData.timezone || ""
+    latitude: enrichedData.latitude || "",
+    longitude: enrichedData.longitude || "",
+    country: enrichedData.country || "",
+    state_province: enrichedData.state_province || "",
+    city: enrichedData.city || "",
+    postcode: enrichedData.postcode || "",
+    timezone: enrichedData.timezone || ""
   });
 }
 
