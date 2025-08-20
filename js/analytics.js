@@ -1,5 +1,5 @@
 // File: js/analytics.js
-// ✅ Versi final – fix integrasi geoTracker.js tanpa ubah struktur utama
+// ✅ Versi final – fix integrasi geoTracker.js dengan sendVideoInteractionToAnalytics()
 
 const ANALYTICS_WEB_APP = "https://script.google.com/macros/s/AKfycbxm5YQAB2kify_9SzPph5xgaEMlsKpE8UNfrPuvmghgDM9meNKCiDPABKHJ4a4p3Nak/exec";
 const videoProgressSession = {};
@@ -112,6 +112,9 @@ function trackVideoInteraction(interactionType, additionalData = {}) {
   });
 }
 
+/**
+ * Kirim data interaksi video standar tanpa lokasi
+ */
 function sendVideoInteraction(data) {
   sendAnalyticsEvent("VIDEO_INTERACTION", {
     interaction_timestamp: getFormattedTimestampWIB(),
@@ -125,16 +128,31 @@ function sendVideoInteraction(data) {
     video_watch_percentage: data.video_watch_percentage || "",
     video_completed: data.video_completed || ""
   });
+}
 
-  // ✅ Integrasi geoTracker.js — kirim lokasi video
-  sendGeoVideoInteraction({
-    video_id: data.video_id,
-    video_title: data.video_title,
-    nama_bahasa: data.nama_bahasa,
-    interaction_type: data.interaction_type,
-    comment_id: data.comment_id || "",
-    video_watch_percentage: data.video_watch_percentage || "",
-    video_completed: data.video_completed || ""
+/**
+ * ✅ Fungsi baru untuk integrasi geoTracker.js
+ * Dipanggil langsung oleh geotracker.js → mengirim data lokasi + video ke Google Sheets
+ */
+function sendVideoInteractionToAnalytics(enrichedData) {
+  sendAnalyticsEvent("VIDEO_INTERACTION", {
+    interaction_timestamp: getFormattedTimestampWIB(),
+    user_id: enrichedData.user_id,
+    user_name: enrichedData.user_name,
+    nama_bahasa: enrichedData.nama_bahasa,
+    video_id: enrichedData.video_id,
+    video_title: enrichedData.video_title,
+    interaction_type: enrichedData.interaction_type,
+    comment_id: enrichedData.comment_id || "",
+    video_watch_percentage: enrichedData.video_watch_percentage || "",
+    video_completed: enrichedData.video_completed || "",
+    latitude: enrichedData.latitude || "",
+    longitude: enrichedData.longitude || "",
+    country: enrichedData.country || "",
+    state_province: enrichedData.state_province || "",
+    city: enrichedData.city || "",
+    postcode: enrichedData.postcode || "",
+    timezone: enrichedData.timezone || ""
   });
 }
 
@@ -167,51 +185,26 @@ function trackWatchProgress(currentTime, duration) {
   if (allowedPoints.includes(percentage) && percentage !== lastSent) {
     videoProgressSession[videoId] = percentage;
 
-    sendAnalyticsEvent("VIDEO_INTERACTION", {
-      interaction_timestamp: getFormattedTimestampWIB(),
+    sendVideoInteraction({
       user_id: user ? user.uid : "ANONYM",
       user_name: user ? user.displayName || "Tanpa Nama" : null,
       nama_bahasa: language,
       video_id: videoId,
       video_title: title,
       interaction_type: "progress_update",
-      comment_id: "",
-      video_watch_percentage: percentage,
-      video_completed: ""
-    });
-
-    // ✅ Kirim geoTracker progress
-    sendGeoVideoInteraction({
-      video_id: videoId,
-      video_title: title,
-      nama_bahasa: language,
-      interaction_type: "progress_update",
-      video_watch_percentage: percentage,
-      video_completed: ""
+      video_watch_percentage: percentage
     });
   }
 
   if (isCompleted && !videoCompletedSession[videoId]) {
     videoCompletedSession[videoId] = true;
 
-    sendAnalyticsEvent("VIDEO_INTERACTION", {
-      interaction_timestamp: getFormattedTimestampWIB(),
+    sendVideoInteraction({
       user_id: user ? user.uid : "ANONYM",
       user_name: user ? user.displayName || "Tanpa Nama" : null,
       nama_bahasa: language,
       video_id: videoId,
       video_title: title,
-      interaction_type: "video_completed",
-      comment_id: "",
-      video_watch_percentage: percentage,
-      video_completed: "yes"
-    });
-
-    // ✅ Kirim geoTracker video_completed
-    sendGeoVideoInteraction({
-      video_id: videoId,
-      video_title: title,
-      nama_bahasa: language,
       interaction_type: "video_completed",
       video_watch_percentage: percentage,
       video_completed: "yes"
