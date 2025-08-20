@@ -1,42 +1,34 @@
-// File: js/auth.js
-
 // 1️⃣ KONFIGURASI DAN INISIALISASI FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E",
   authDomain: "animasiosd-github.firebaseapp.com",
   projectId: "animasiosd-github",
-  storageBucket: "animasiosd-github.firebasestorage.app",
+  storageBucket: "animasiosd-github.appspot.com",
   messagingSenderId: "424179260770",
   appId: "1:424179260770:web:2f4a04a8c9643027bca03b",
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// ▼▼▼ FUNGSI BARU UNTUK MENGATUR SELURUH NAVBAR ▼▼▼
+// ▼▼▼ Fungsi untuk menampilkan navbar jika user login
 function toggleNavbarVisibility(user) {
-    const navbarPlaceholder = document.getElementById('navbar-placeholder');
-    if (navbarPlaceholder) {
-        if (user) {
-            // Jika ada user, tampilkan navbar
-            navbarPlaceholder.style.display = 'block';
-        } else {
-            // Jika tidak ada user, sembunyikan navbar
-            navbarPlaceholder.style.display = 'none';
-        }
-    }
+  const navbarPlaceholder = document.getElementById('navbar-placeholder');
+  if (navbarPlaceholder) {
+    navbarPlaceholder.style.display = user ? 'block' : 'none';
+  }
 }
 
-// 2️⃣ FUNGSI LOGOUT GLOBAL
+// 2️⃣ Fungsi Logout
 function logout() {
-  logUserBehavior("logout_button");   // <-- tracking analytics logout user
+  logUserBehavior("logout_button"); // analytics
   auth.signOut().then(() => {
-    window.location.href = 'index.html'; // Arahkan pengguna kembali ke halaman utama setelah logout berhasil
-    }).catch((error) => {
-      console.error('Logout Error:', error); // Menangani jika terjadi error saat logout
+    window.location.href = 'index.html';
+  }).catch(error => {
+    console.error('Logout Error:', error);
   });
 }
 
-// 4️⃣ FUNSI MODAL LOGIN GAGAL (Dinamis)
+// 3️⃣ Modal Login Gagal
 function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
   let existingModal = document.getElementById("loginFailModal");
   if (existingModal) existingModal.remove();
@@ -66,37 +58,48 @@ function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
   bsModal.show();
 }
 
-// 3️⃣ PANTAU STATUS LOGIN DI SETIAP HALAMAN
+// 4️⃣ Login dengan Redirect
 document.addEventListener('DOMContentLoaded', () => {
   const pageLoader = document.getElementById("page-loader");
   const loginContainer = document.getElementById("loginContainer");
-  const mainContent = document.getElementById("mainContent");
+  const mainContent = document.getElementById("main-content"); // ✅ pastikan id sama dengan HTML
 
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
     loginBtn.onclick = () => {
       logUserBehavior("login_button");
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(error => {
+      auth.signInWithRedirect(provider).catch(error => {
         console.error("Login Gagal:", error);
-        showLoginFailModal(); // <-- panggil modal Bootstrap
+        showLoginFailModal();
       });
     };
   }
 
+  // 5️⃣ Tangani hasil redirect
+  auth.getRedirectResult()
+    .then(result => {
+      if (result.user) {
+        console.log("Login berhasil via redirect:", result.user.displayName);
+      }
+    })
+    .catch(error => {
+      console.error("Error redirect:", error);
+      showLoginFailModal();
+    });
+
+  // 6️⃣ Pantau perubahan status login
   auth.onAuthStateChanged(user => {
-    // Panggil fungsi visibilitas navbar
     toggleNavbarVisibility(user);
 
-    if (pageLoader) pageLoader.classList.add('d-none');
-
+    if (pageLoader) pageLoader.classList.add('d-none'); // atau gunakan animasi loader
     if (user) {
       if (mainContent) mainContent.classList.remove('d-none');
       if (loginContainer) loginContainer.classList.add('d-none');
 
-      const welcomeMessage = document.getElementById("welcomeMessage");
+      const welcomeMessage = document.getElementById("welcome-text");
       if (welcomeMessage && user.displayName) {
-        welcomeMessage.textContent = `Selamat datang, ${user.displayName}!`;
+        welcomeMessage.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
       }
     } else {
       if (loginContainer) loginContainer.classList.remove('d-none');

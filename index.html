@@ -17,7 +17,7 @@
     #loader-text { color:#555; margin-top:20px; font-size:1.2em; }
     .progress-container { width:80%; max-width:400px; background:#e0e0e0; border-radius:25px; overflow:hidden; }
     #progress-bar { width:0%; height:20px; background:#0d6efd; border-radius:25px; transition:width 0.1s linear; }
-    #main-content, #loginContainer { display:none; padding:40px; text-align:center; }
+    #mainContent, #loginContainer { display:none; padding:40px; text-align:center; }
     #loginContainer { justify-content:center; align-items:center; height:100vh; }
     /* Pop-up PWA */
     #installPopup {
@@ -72,7 +72,7 @@
   </div>
 </div>
 
-<div id="main-content">
+<div id="mainContent">
   <header>
     <h1 id="welcome-text">🎉 Selamat Datang! (Beta Version)</h1>
     <p>Mau dengar cerita dari mana? Pilih bahasanya di tombol <strong>Pilih Bahasa</strong> ↗️</p>
@@ -183,7 +183,7 @@ window.addEventListener('mouseup', () => {
 
 // Firebase Auth
 firebase.auth().onAuthStateChanged(function(user) {
-  const mainContent = document.getElementById("main-content");
+  const mainContent = document.getElementById("mainContent");
   const loginContainer = document.getElementById("loginContainer");
   const welcomeText = document.getElementById("welcome-text");
 
