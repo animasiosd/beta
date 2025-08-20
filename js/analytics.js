@@ -131,17 +131,26 @@ function trackVideoInteraction(interactionType, additionalData = {}) {
   const videoTitle = document.getElementById("videoTitle")?.textContent || "Tanpa Judul";
   const language = window.currentLanguagePage || null;
   const videoId = window.currentVideoId || null;
+  const geo = window.latestGeoData || {};
 
-  sendVideoInteraction({
+  sendVideoInteractionToAnalytics({
     user_id: user ? user.uid : "ANONYM",
     user_name: user ? user.displayName : "TIDAK DIKETAHUI",
     nama_bahasa: language,
     video_id: videoId,
     video_title: videoTitle,
     interaction_type: interactionType,
-    ...additionalData
+    ...additionalData,
+    latitude: geo.latitude || "",
+    longitude: geo.longitude || "",
+    country: geo.country || "",
+    state_province: geo.state_province || "",
+    city: resolveCityName(geo),
+    postcode: geo.postcode || "",
+    timezone: geo.timezone || ""
   });
 }
+
 
 /**
  * Kirim data interaksi video dengan dukungan geoTracker.js
@@ -225,7 +234,7 @@ function trackWatchProgress(currentTime, duration) {
   if (allowedPoints.includes(percentage) && percentage !== lastSent) {
     videoProgressSession[videoId] = percentage;
 
-    sendVideoInteraction({
+    sendVideoInteractionToAnalytics({
       user_id: user ? user.uid : "ANONYM",
       user_name: user ? user.displayName || "Tanpa Nama" : null,
       nama_bahasa: language,
@@ -233,6 +242,7 @@ function trackWatchProgress(currentTime, duration) {
       video_title: title,
       interaction_type: "progress_update",
       video_watch_percentage: percentage,
+      video_completed: "",
       latitude: geo.latitude || "",
       longitude: geo.longitude || "",
       country: geo.country || "",
@@ -247,15 +257,15 @@ function trackWatchProgress(currentTime, duration) {
   if (isCompleted && !videoCompletedSession[videoId]) {
     videoCompletedSession[videoId] = true;
 
-    sendVideoInteraction({
+    sendVideoInteractionToAnalytics({
       user_id: user ? user.uid : "ANONYM",
       user_name: user ? user.displayName || "Tanpa Nama" : null,
       nama_bahasa: language,
       video_id: videoId,
       video_title: title,
-      interaction_type: "video_completed",
+      interaction_type: "progress_update",
       video_watch_percentage: percentage,
-      video_completed: "yes",
+      video_completed: "",
       latitude: geo.latitude || "",
       longitude: geo.longitude || "",
       country: geo.country || "",
