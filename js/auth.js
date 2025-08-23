@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           // Redirect ke halaman utama agar URL bersih
-          window.location.href = "https://animasiosd.github.io/beta/";
+          window.location.href = "https://animasiosd.github.io/beta/index.html";
         })
         .catch(error => {
           console.error("Login Gagal:", error);
@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Jika user SUDAH login dan berada di halaman login → pindahkan ke halaman utama
     if (user && currentPath.endsWith("/beta/login")) {
-      window.location.href = "https://animasiosd.github.io/beta/";
+      window.location.href = "https://animasiosd.github.io/beta/index.html";
       return;
     }
 
