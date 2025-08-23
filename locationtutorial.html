@@ -176,50 +176,33 @@ const btnLanjutkan = document.getElementById("btnLanjutkan");
 
 // Fungsi cek izin lokasi + status login
 btnLanjutkan.addEventListener("click", function () {
-    const locationStatus = localStorage.getItem("locationPermission");
-
-    // Kalau sudah pernah diizinkan → langsung masuk
-    if (locationStatus === "granted") {
-        window.location.href = "/beta/index.html";
-        return;
-    }
-
-    // Kalau sudah pernah ditolak → logout otomatis
-    if (locationStatus === "denied") {
-        handleLogout();
-        return;
-    }
-
-    // Jika belum ada status, cek lokasi sekarang
-    if (!navigator.geolocation) {
-        localStorage.setItem("locationPermission", "denied");
-        handleLogout();
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        // ✅ Jika diizinkan
-        function (position) {
+    // Selalu cek ulang status izin lokasi langsung dari browser, bukan hanya dari localStorage
+    navigator.permissions.query({ name: "geolocation" }).then(function (result) {
+        if (result.state === "granted") {
+            // Jika sekarang sudah diizinkan
             localStorage.setItem("locationPermission", "granted");
             window.location.href = "/beta/index.html";
-        },
-        // ❌ Jika ditolak
-        function (error) {
-            if (error.code === error.PERMISSION_DENIED) {
-                localStorage.setItem("locationPermission", "denied");
-                handleLogout();
-            } else {
-                localStorage.setItem("locationPermission", "denied");
-                handleLogout();
-            }
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 8000,
-            maximumAge: 0
+        } else if (result.state === "prompt") {
+            // Jika belum pernah pilih, minta izin lagi
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    localStorage.setItem("locationPermission", "granted");
+                    window.location.href = "/beta/index.html";
+                },
+                function (error) {
+                    localStorage.setItem("locationPermission", "denied");
+                    handleLogout();
+                },
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+            );
+        } else {
+            // Jika tetap ditolak
+            localStorage.setItem("locationPermission", "denied");
+            handleLogout();
         }
-    );
+    });
 });
+
 
 // Fungsi logout Firebase
 function handleLogout() {
