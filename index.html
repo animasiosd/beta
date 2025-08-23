@@ -88,6 +88,36 @@
   </div>
 </div>
 
+<!-- Modal Bootstrap Tutorial Izinkan Lokasi-->
+<div class="modal fade" id="tutorialModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cara Mengizinkan Lokasi</h5>
+      </div>
+      <div class="modal-body">
+        <div id="carouselTutorial" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img src="components/tutorial-lokasi-chrome-01.webp" class="d-block w-100">
+            </div>
+            <div class="carousel-item">
+              <img src="components/tutorial-lokasi-chrome-02.webp" class="d-block w-100">
+            </div>
+            <!-- dst sampai 7 gambar -->
+          </div>
+          <button class="carousel-control-prev" data-bs-target="#carouselTutorial" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" data-bs-target="#carouselTutorial" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
@@ -97,41 +127,6 @@
 <script src="js/main.js"></script>
 <script src="js/geotracker.js"></script>
 <script src="js/analytics.js"></script>
-
-<!-- Modal Bootstrap -->
-<div class="modal fade" id="tutorialModal" tabindex="-1" aria-labelledby="tutorialModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-
-      <!-- Header -->
-      <div class="modal-header">
-        <h5 class="modal-title" id="tutorialModalLabel">Cara Mengizinkan Lokasi</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <!-- Body: Bootstrap Carousel -->
-      <div class="modal-body">
-        <div id="tutorialCarousel" class="carousel slide" data-bs-ride="carousel">
-          <div class="carousel-inner" id="carousel-images"></div>
-
-          <!-- Control Buttons -->
-          <button class="carousel-control-prev" type="button" data-bs-target="#tutorialCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#tutorialCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer">
-        <button id="allowLocationBtn" class="btn btn-primary">Saya Sudah Mengizinkan</button>
-        <button id="denyLocationBtn" class="btn btn-danger">Tetap Tolak</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 let deferredPrompt;
