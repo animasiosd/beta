@@ -2,7 +2,7 @@
 function requestUserGeolocation() {
     if (!navigator.geolocation) {
         // Jika browser tidak mendukung geolocation, langsung logout
-        window.location.href = "/beta/login_page.html"; // Ganti path logout sesuai aplikasimu
+        window.location.href = "/beta/login"; // Ganti path logout sesuai aplikasimu
         return;
     }
 
@@ -16,7 +16,7 @@ function requestUserGeolocation() {
         function (error) {
             if (error.code === error.PERMISSION_DENIED) {
               console.log("Lokasi ditolak ❌, logout...");
-                window.location.href = "/beta/login_page.html"; // Ganti path logout sesuai aplikasimu
+                window.location.href = "/beta/login"; // Ganti path logout sesuai aplikasimu
             }
         },
 
