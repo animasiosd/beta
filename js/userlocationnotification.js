@@ -26,17 +26,17 @@ document.addEventListener("DOMContentLoaded", function () {
     function doLogout() {
         if (firebase?.auth) {
             firebase.auth().signOut().then(() => {
-                window.location.href = "/beta/logout.html";
+                window.location.href = "/beta/index.html";
             });
         } else {
-            window.location.href = "/beta/logout.html";
+            window.location.href = "/beta/index.html";
         }
     }
 
     // Fungsi untuk meminta lokasi
     function requestUserLocation() {
         if (!navigator.geolocation) {
-            alert("Browser Anda tidak mendukung fitur lokasi. Silakan gunakan Google Chrome.");
+            alert("Browser Anda tidak mendukung fitur lokasi. Silakan gunakan Google Chrome terbaru.");
             doLogout();
             return;
         }
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     } else {
         // Browser lama → logout otomatis
-        alert("Browser Anda tidak mendukung fitur lokasi. Silakan gunakan Google Chrome.");
+        alert("Browser Anda tidak mendukung fitur lokasi. Silakan gunakan Google Chrome versi terbaru.");
         doLogout();
     }
 
