@@ -2,7 +2,7 @@
 function requestUserGeolocation() {
     if (!navigator.geolocation) {
         // Jika browser tidak mendukung geolocation, langsung logout
-        window.location.href = "/logout"; // Ganti path logout sesuai aplikasimu
+        window.location.href = "/beta/login_page.html"; // Ganti path logout sesuai aplikasimu
         return;
     }
 
@@ -10,14 +10,13 @@ function requestUserGeolocation() {
         // ✅ Jika user mengizinkan
         function (position) {
             console.log("Lokasi diizinkan ✅");
-            console.log("Latitude:", position.coords.latitude);
-            console.log("Longitude:", position.coords.longitude);
         },
 
         // ❌ Jika user menolak → langsung logout tanpa pemberitahuan
         function (error) {
             if (error.code === error.PERMISSION_DENIED) {
-                window.location.href = "/beta/index.html"; // Ganti path logout sesuai aplikasimu
+              console.log("Lokasi ditolak ❌, logout...");
+                window.location.href = "/beta/login_page.html"; // Ganti path logout sesuai aplikasimu
             }
         },
 
