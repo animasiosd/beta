@@ -87,7 +87,7 @@
         }
 
         .note {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #3d3d3d;
             margin-top: 15px;
             text-align: center;
@@ -110,11 +110,11 @@
         <p><strong>Jika anda tetap menolak izin lokasi maka anda akan otomatis logout.</strong></p>
     </div>
 
-    <!-- Tombol Kembali ke Login -->
-    <div class="container text-center mb-3">
-        <a href="/beta/index.html" class="btn btn-custom btn-lg">
-            <i class="bi bi-arrow-left-circle"></i> Lanjutkan
-        </a>
+    <!-- Tombol Lanjutkan -->
+     <div class="container text-center mb-3">
+        <button id="btnLanjutkan" class="btn btn-custom btn-lg">
+            <i class="bi bi-arrow-right-circle"></i> Lanjutkan
+        </button>
     </div>
 
     <!-- Carousel Tutorial -->
@@ -164,6 +164,41 @@
             stepIndicator.textContent = `Langkah ${currentIndex} / ${totalGambar}`;
         });
     </script>
+
+    <script>
+    const btnLanjutkan = document.getElementById("btnLanjutkan");
+
+    btnLanjutkan.addEventListener("click", function () {
+        // Cek apakah browser mendukung geolocation
+        if (!navigator.geolocation) {
+            // Jika tidak mendukung → anggap gagal dan logout
+            window.location.href = "/beta/login";
+            return;
+        }
+
+        // Panggil geolocation hanya sekali ketika tombol diklik
+        navigator.geolocation.getCurrentPosition(
+            // ✅ Jika user mengizinkan lokasi
+            function (position) {
+                window.location.href = "/beta/index.html";
+            },
+            // ❌ Jika user menolak lokasi
+            function (error) {
+                if (error.code === error.PERMISSION_DENIED) {
+                    window.location.href = "/beta/login";
+                } else {
+                    // Jika error lain (misalnya timeout), tetap arahkan ke login
+                    window.location.href = "/beta/login";
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 8000,
+                maximumAge: 0
+            }
+        );
+    });
+</script>
 
 </body>
 </html>
