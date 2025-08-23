@@ -1,22 +1,26 @@
 // File: js/userLocationNotification.js
 function requestUserGeolocation() {
     if (!navigator.geolocation) {
-        // Jika browser tidak mendukung geolocation, langsung logout
-        window.location.href = "/beta/login"; // Ganti path logout sesuai aplikasimu
+        // Jika browser tidak mendukung geolocation → arahkan ke halaman tutorial
+        window.location.href = "/beta/locationtutorial.html";
         return;
     }
 
     navigator.geolocation.getCurrentPosition(
-        // ✅ Jika user mengizinkan
+        // ✅ Jika user mengizinkan lokasi
         function (position) {
             console.log("Lokasi diizinkan ✅");
+            // Lanjutkan ke halaman utama
         },
 
-        // ❌ Jika user menolak → langsung logout tanpa pemberitahuan
+        // ❌ Jika user menolak izin lokasi
         function (error) {
             if (error.code === error.PERMISSION_DENIED) {
-              console.log("Lokasi ditolak ❌, logout...");
-                window.location.href = "/beta/login"; // Ganti path logout sesuai aplikasimu
+                console.log("Lokasi ditolak ❌, menampilkan tutorial...");
+                // Arahkan ke halaman tutorial izinkan lokasi
+                window.location.href = "/beta/locationtutorial.html";
+            } else {
+                console.log("Terjadi kesalahan lain:", error.message);
             }
         },
 
