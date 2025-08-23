@@ -115,6 +115,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 6️⃣ Update UI saat status login berubah
   auth.onAuthStateChanged(user => {
+    if (!user) {
+    // Jika belum login, redirect ke halaman login
+    if (!window.location.pathname.includes("/beta/login")) {
+      window.location.href = "/beta/login";
+    }
+  }
     toggleNavbarVisibility(user);
 
     if (pageLoader) pageLoader.classList.add('d-none');
