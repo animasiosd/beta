@@ -126,17 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
             welcomeMessage.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
           }
 
-          // Redirect pasca-login:
-          // - Jika lokasi sudah "granted" -> ke halaman utama
-          // - Jika belum -> ke halaman tutorial lokasi (tidak memicu geolocation otomatis)
-          const statusNow = getLocationStatus();
-          if (statusNow === "granted") {
-            window.location.href = URLS.index; // bisa diganti URLS.index => https://.../beta/
-          } else {
-            window.location.href = URLS.tutorial;
-          }
-        })
-        .catch((error) => {
           console.error("Login Gagal:", error);
           showLoginFailModal(error.message);
         });
