@@ -170,6 +170,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2) Jika user SUDAH login tapi lokasi BELUM "granted" → arahkan ke tutorial (kecuali sudah di situ)
     const statusNow = getLocationStatus();
     if (statusNow !== "granted" && !onTutorialPage) {
+      // ✅ BARIS INI untuk menyimpan URL saat ini
+      sessionStorage.setItem('redirectAfterPermission', window.location.href);
       redirectTo(URLS.tutorial);
       return;
     }
