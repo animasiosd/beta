@@ -186,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
     handleLoggedInState(user);
   });
 
-  // [Tetap dalam struktur ini] — atur tampilan saat sudah login
+  // [Tetap dalam struktur ini] — atur tampilan saat sudah login sementara oke
   function handleLoggedInState(user) {
     if (pageLoader) pageLoader.classList.add("d-none");
 
