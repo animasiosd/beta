@@ -160,6 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1) Jika user BELUM login → paksa ke halaman login (dari halaman mana pun)
     if (!user) {
       if (!onLoginPage) {
+        // ✅ BARIS INI untuk menyimpan URL saat ini sebelum redirect ke login
+        sessionStorage.setItem('redirectAfterPermission', window.location.href);
         redirectTo(URLS.login);
         return;
       }
