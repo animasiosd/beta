@@ -132,51 +132,46 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================
   // 6️⃣ CEK STATUS LOGIN (VERSI BARU YANG LEBIH CERDAS)
   // ============================
-  auth.onAuthStateChanged((user) => {
+   auth.onAuthStateChanged((user) => {
     const currentPath = window.location.pathname;
 
-    // Helper deteksi halaman
     const onLoginPage = currentPath.includes("/beta/login");
     const onTutorialPage = currentPath.includes("/beta/locationtutorial.html");
 
-    // ======================================================================
     // PRIORITAS #1: TANGANI PENGGUNA YANG BELUM LOGIN
-    // ======================================================================
     if (!user) {
-      // Jika pengguna belum login dan belum berada di halaman login,
-      // simpan URL tujuan dan paksa ke halaman login.
       if (!onLoginPage) {
         const urlToSave = window.location.href;
-        console.log(`[AUTH-LOGIC] Pengguna belum login. Menyimpan URL tujuan: ${urlToSave}`);
+        console.log(`[AUTH-LOGIC] PRIORITAS 1: Pengguna belum login. Menyimpan URL tujuan: ${urlToSave}`);
         sessionStorage.setItem('redirectAfterPermission', urlToSave);
         redirectTo(URLS.login);
       } else {
-        // Jika sudah di halaman login, cukup sembunyikan loader.
         hideLoader();
       }
-      return; // Hentikan eksekusi di sini untuk pengguna yang belum login.
+      return; // WAJIB: Hentikan eksekusi di sini.
     }
 
     // ======================================================================
-    // JIKA KODE SAMPAI DI SINI, ARTINYA PENGGUNA SUDAH PASTI LOGIN (user === true)
+    // JIKA KODE SAMPAI DI SINI, PENGGUNA SUDAH PASTI LOGIN
     // ======================================================================
     
-    // PRIORITAS #2: TANGANI PENGGUNA YANG SUDAH LOGIN TAPI IZIN LOKASI BELUM ADA
+    // PRIORITAS #2: TANGANI PENGGUNA LOGIN TAPI IZIN LOKASI BELUM ADA
     const statusNow = getLocationStatus();
     if (statusNow !== "granted" && !onTutorialPage) {
-      // URL asli (misal: Toli-Toli) seharusnya sudah tersimpan saat pengguna belum login.
-      // Kita tidak perlu menyimpannya lagi di sini untuk menghindari penimpaan.
-      console.log("[AUTH-LOGIC] Pengguna sudah login, tapi izin lokasi belum ada. Mengarahkan ke tutorial.");
+      // PENTING: JANGAN simpan sessionStorage lagi di sini.
+      // URL yang benar (Toli-Toli) sudah disimpan oleh PRIORITAS #1.
+      // Jika kita simpan lagi, URL Toli-Toli akan tertimpa URL halaman saat ini.
+      console.log("[AUTH-LOGIC] PRIORITAS 2: Pengguna sudah login, tapi izin lokasi belum ada. Mengarahkan ke tutorial.");
       redirectTo(URLS.tutorial);
       return;
     }
 
-    // PRIORITAS #3: TANGANI PENGGUNA YANG SUDAH LOGIN & TERJEBAK DI HALAMAN LOGIN
+    // PRIORITAS #3: TANGANI PENGGUNA LOGIN & TERJEBAK DI HALAMAN LOGIN
     if (onLoginPage) {
       const redirectUrl = sessionStorage.getItem('redirectAfterPermission');
       const finalDestination = redirectUrl || URLS.index;
       
-      console.log(`[AUTH-LOGIC] Pengguna sudah login tapi ada di halaman login. Mengarahkan ke: ${finalDestination}`);
+      console.log(`[AUTH-LOGIC] PRIORITAS 3: Pengguna sudah login tapi ada di halaman login. Mengarahkan ke: ${finalDestination}`);
       
       if (redirectUrl) {
         sessionStorage.removeItem('redirectAfterPermission');
@@ -185,10 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // PRIORITAS #4: JIKA SEMUA KONDISI DI ATAS TIDAK TERPENUHI
-    // Artinya: Pengguna sudah login, izin lokasi sudah ada, dan tidak di halaman login/tutorial.
-    // Ini adalah kondisi ideal, tampilkan konten utama.
-    console.log("[AUTH-LOGIC] Pengguna sudah login dan izin lokasi OK. Menampilkan konten.");
+    // PRIORITAS #4: KONDISI IDEAL
+    // Pengguna sudah login, izin lokasi sudah ada, dan tidak di halaman anomali.
+    console.log("[AUTH-LOGIC] PRIORITAS 4: Pengguna ideal. Menampilkan konten.");
     handleLoggedInState(user);
   });
 
