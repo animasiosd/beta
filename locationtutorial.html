@@ -179,6 +179,9 @@ btnLanjutkan.addEventListener("click", function () {
         
         // ✅ SOLUSI: Ambil URL tujuan dari sessionStorage. Jika tidak ada, baru gunakan index.html.
         const redirectUrl = sessionStorage.getItem('redirectAfterPermission');
+        // 👈 LOG 3: Tambahkan log ini di sini
+        console.log(`[TUTORIAL-LOG] Tombol Lanjutkan diklik. URL dari sessionStorage: ${redirectUrl}`);
+        
         const finalDestination = redirectUrl || "/beta/index.html";
 
         if (result.state === "granted") {

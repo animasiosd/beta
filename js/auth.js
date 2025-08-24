@@ -125,9 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (welcomeMessage && user.displayName) {
             welcomeMessage.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
           }
-
-          console.error("Login Gagal:", error);
-          showLoginFailModal(error.message);
         });
     };
   }
@@ -149,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1) Jika user BELUM login → paksa ke halaman login (dari halaman mana pun)
     if (!user) {
       if (!onLoginPage) {
+        console.log(`[AUTH-LOG] User belum login. Menyimpan URL: ${urlToSave}`); // 👈 LOG 1
         // ✅ BARIS INI untuk menyimpan URL saat ini sebelum redirect ke login
         sessionStorage.setItem('redirectAfterPermission', window.location.href);
         redirectTo(URLS.login);
@@ -161,6 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2) Jika user SUDAH login tapi lokasi BELUM "granted" → arahkan ke tutorial (kecuali sudah di situ)
     const statusNow = getLocationStatus();
     if (statusNow !== "granted" && !onTutorialPage) {
+      console.log(`[AUTH-LOG] Izin lokasi belum ada. Menyimpan URL: ${urlToSave}`); // 👈 LOG 2
       // ✅ BARIS INI untuk menyimpan URL saat ini
       sessionStorage.setItem('redirectAfterPermission', window.location.href);
       redirectTo(URLS.tutorial);
