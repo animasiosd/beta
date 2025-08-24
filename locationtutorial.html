@@ -174,35 +174,38 @@
     <script>
 const btnLanjutkan = document.getElementById("btnLanjutkan");
 
-// Fungsi cek izin lokasi + status login
 btnLanjutkan.addEventListener("click", function () {
-    // Selalu cek ulang status izin lokasi langsung dari browser, bukan hanya dari localStorage
     navigator.permissions.query({ name: "geolocation" }).then(function (result) {
+        
+        // ✅ SOLUSI: Ambil URL tujuan dari sessionStorage. Jika tidak ada, baru gunakan index.html.
+        const redirectUrl = sessionStorage.getItem('redirectAfterPermission');
+        const finalDestination = redirectUrl || "/beta/index.html";
+
         if (result.state === "granted") {
-            // Jika sekarang sudah diizinkan
             localStorage.setItem("locationPermission", "granted");
-            window.location.href = "/beta/index.html";
-        } else if (result.state === "prompt") {
-            // Jika belum pernah pilih, minta izin lagi
+            // Hapus item dari sessionStorage setelah akan digunakan agar bersih
+            if (redirectUrl) sessionStorage.removeItem('redirectAfterPermission');
+            window.location.href = finalDestination; // <-- Mengarahkan ke tujuan yang benar
+        } 
+        else if (result.state === "prompt") {
             navigator.geolocation.getCurrentPosition(
-                function (position) {
+                function (position) { // User mengizinkan
                     localStorage.setItem("locationPermission", "granted");
-                    window.location.href = "/beta/index.html";
+                    if (redirectUrl) sessionStorage.removeItem('redirectAfterPermission');
+                    window.location.href = finalDestination; // <-- Mengarahkan ke tujuan yang benar
                 },
-                function (error) {
+                function (error) { // User menolak
                     localStorage.setItem("locationPermission", "denied");
                     handleLogout();
-                },
-                { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+                }
             );
-        } else {
-            // Jika tetap ditolak
+        } 
+        else { // Izin sudah ditolak sebelumnya
             localStorage.setItem("locationPermission", "denied");
             handleLogout();
         }
     });
 });
-
 
 // Fungsi logout Firebase
 function handleLogout() {
