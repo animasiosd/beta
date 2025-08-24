@@ -37,14 +37,14 @@
       height: 3rem;
     }
 
-    /* Sembunyikan default, gunakan Bootstrap d-none untuk kontrol */
-    #mainContent, #loginContainer {padding: 40px; text-align: center; }
-    #loginContainer {justify-content: center; align-items: center; height: 100vh; }
+    /* Kontrol halaman utama/login */
+    #mainContent, #loginContainer {padding: 40px; text-align: center;}
+    #loginContainer {justify-content: center; align-items: center; height: 100vh;}
   </style>
 </head>
 <body>
 
-<!-- Navbar -->
+<!-- Navbar placeholder -->
 <div id="navbar-placeholder"></div>
 
 <!-- Loader Spinner Fullscreen -->
@@ -88,31 +88,29 @@ document.addEventListener("DOMContentLoaded", function() {
   const pageLoader = document.getElementById('page-loader');
   const loaderTimeout = 15000; // fallback 15 detik
 
-  // Promise timeout fallback supaya spinner tidak stuck
-  const timeoutPromise = new Promise((resolve) => setTimeout(resolve, loaderTimeout));
+  const timeoutPromise = new Promise(resolve => setTimeout(resolve, loaderTimeout));
 
-  // Fetch navbar dan load bahasa
   const loadNavbarAndLanguages = new Promise((resolve, reject) => {
     const navbarPlaceholder = document.getElementById("navbar-placeholder");
-
     if (!navbarPlaceholder) return reject("Navbar placeholder tidak ditemukan.");
 
-    // Cek cache dulu
     const cachedNavbar = localStorage.getItem('navbarHTML');
     if (cachedNavbar) {
       navbarPlaceholder.innerHTML = cachedNavbar;
-      resolve('cache');
     }
 
-    // Fetch navbar.html
     fetch('navbar.html')
       .then(res => {
         if(!res.ok) throw new Error('Gagal memuat navbar.');
         return res.text();
       })
       .then(html => {
-        const oldCount = cachedNavbar ? (new DOMParser().parseFromString(cachedNavbar,'text/html')).querySelectorAll('.language-btn').length : 0;
-        const newCount = (new DOMParser().parseFromString(html,'text/html')).querySelectorAll('.language-btn').length;
+        // Hitung jumlah bahasa di dropdown
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newCount = doc.querySelectorAll('#languagesDropdown .dropdown-item').length;
+
+        const oldCount = cachedNavbar ? parser.parseFromString(cachedNavbar,'text/html').querySelectorAll('#languagesDropdown .dropdown-item').length : 0;
 
         if(newCount !== oldCount) {
           navbarPlaceholder.innerHTML = html;
@@ -131,7 +129,6 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   });
 
-  // Tunggu navbar + bahasa selesai atau timeout fallback
   Promise.race([loadNavbarAndLanguages, timeoutPromise])
     .finally(() => {
       pageLoader.style.display = 'none';

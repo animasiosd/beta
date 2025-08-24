@@ -12,14 +12,12 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(html => {
         navbarPlaceholder.innerHTML = html;
 
-        // Panggil fungsi visibilitas navbar yang baru
         toggleNavbarVisibility(firebase.auth().currentUser);
 
         requestAnimationFrame(() => {
           highlightActiveMenu();
           loadDynamicLanguages();
 
-          // Tunggu sampai fungsi dari video.js & comments.js tersedia
           const waitUntilReady = () => {
             if (
               typeof firebase !== 'undefined' &&
@@ -49,15 +47,13 @@ function highlightActiveMenu() {
   });
 }
 
-// File: js/main.js
-
 function loadDynamicLanguages() {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       const dropdown = document.getElementById('languagesDropdown');
       if (!dropdown) {
         console.error("❌ Element #languagesDropdown masih belum ditemukan. Cek kembali navbar.html.");
-        return reject();
+        return reject("Element #languagesDropdown tidak ditemukan");
       }
 
       fetch(BAHASA_API_URL)
@@ -76,11 +72,10 @@ function loadDynamicLanguages() {
 
             const listItem = document.createElement('li');
             const link = document.createElement('a');
-            link.className = 'dropdown-item';
+            link.className = 'dropdown-item language-btn'; // tambahkan class language-btn
             link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}`;
             link.textContent = `Bahasa ${bahasa.display}`;
 
-            // ✅ Tracking klik bahasa
             link.addEventListener("click", () => {
               logUserBehavior("language_selected", bahasa.display);
             });
@@ -88,9 +83,10 @@ function loadDynamicLanguages() {
             listItem.appendChild(link);
             dropdown.appendChild(listItem);
           });
+
           resolve();
         })
-        .catch((err) => {
+        .catch(err => {
           console.error("❌ Gagal memuat bahasa:", err);
           dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
           resolve();
