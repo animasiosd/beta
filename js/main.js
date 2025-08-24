@@ -4,32 +4,45 @@ const BAHASA_API_URL = "https://script.google.com/macros/s/AKfycbwCT57fhlebRz7nK
 
 // Listener utama yang akan berjalan di setiap halaman
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("🚀 Memulai proses pemuatan navbar...");
   const navbarPlaceholder = document.getElementById("navbar-placeholder");
-  if (!navbarPlaceholder) return; // Keluar jika halaman tidak punya placeholder navbar
-
-  // Coba muat dari cache dulu untuk kecepatan
-  const cachedNavbar = localStorage.getItem('navbarHTML');
-  if (cachedNavbar) {
-    navbarPlaceholder.innerHTML = cachedNavbar;
-    initializeNavbarFunctions(); // Panggil fungsi setelah render dari cache
+  if (!navbarPlaceholder) {
+    console.warn("🟡 Placeholder navbar tidak ditemukan di halaman ini. Proses dihentikan.");
+    return;
   }
 
-  // Tetap fetch versi terbaru dari server untuk memastikan konten up-to-date
+  // Coba muat dari cache dulu untuk kecepatan
+  console.log("🔍 Mengecek cache untuk 'navbarHTML'...");
+  const cachedNavbar = localStorage.getItem('navbarHTML');
+  if (cachedNavbar) {
+    console.log("✅ Navbar berhasil dimuat dari cache.");
+    navbarPlaceholder.innerHTML = cachedNavbar;
+    initializeNavbarFunctions(); // Panggil fungsi setelah render dari cache
+  } else {
+    console.log("⚪️ Cache 'navbarHTML' kosong.");
+  }
+
+  // Tetap fetch versi terbaru dari server
+  console.log("🌐 Memulai fetch 'navbar.html' dari server...");
   fetch('navbar.html')
     .then(res => {
-      if (!res.ok) throw new Error('Gagal memuat navbar.');
+      if (!res.ok) throw new Error(`Gagal memuat navbar. Status: ${res.status}`);
+      console.log("👍 Fetch 'navbar.html' berhasil diterima.");
       return res.text();
     })
     .then(html => {
-      // Hanya update DOM jika ada perubahan, untuk menghindari flicker
+      // Hanya update DOM jika ada perubahan
       if (html !== cachedNavbar) {
+        console.log("✨ Konten navbar baru ditemukan, memperbarui DOM dan menyimpan ke cache.");
         navbarPlaceholder.innerHTML = html;
         localStorage.setItem('navbarHTML', html);
+      } else {
+        console.log("👌 Konten navbar dari server sama dengan cache, tidak ada pembaruan DOM.");
       }
       initializeNavbarFunctions(); // Panggil fungsi setelah render dari fetch
     })
     .catch(err => {
-      console.error("❌ Error memuat navbar:", err);
+      console.error("❌ Terjadi kesalahan saat fetch navbar:", err);
     });
 });
 
