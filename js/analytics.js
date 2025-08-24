@@ -84,33 +84,45 @@ function sendAnalyticsEvent(eventType, dataObject) {
 }
 
 async function logUserLogin(user) {
-  // 1. Jangan lakukan apa pun jika tidak ada user atau jika user adalah anonim.
   if (!user || user.isAnonymous) {
-    console.log("[Analytics] Proses login dibatalkan untuk user anonim atau tidak valid.");
     return;
   }
 
-  let locationData = {}; // Siapkan objek kosong untuk data lokasi
+  let locationData = {};
+  let ageData = { age_range: null, minAge: null }; // Default value
 
   try {
-    // 2. Panggil getUserLocation() dari geotracker.js untuk mendapatkan detail lokasi.
-    console.log("[Analytics] Memulai pengambilan data lokasi untuk user:", user.displayName);
     locationData = await getUserLocation();
-    console.log("[Analytics] Berhasil mendapatkan data lokasi:", locationData.city, locationData.country);
   } catch (error) {
-    // 3. Jika pengambilan lokasi gagal (misal: izin ditolak),
-    // kita tetap lanjut, namun data lokasi akan kosong.
-    console.warn("[Analytics] Gagal mendapatkan data lokasi. Melanjutkan tanpa data geo.", error.message);
+    console.warn("[Analytics] Gagal mendapatkan data lokasi.", error.message);
   }
 
-  // 4. Siapkan payload sesuai dengan nama kolom di Google Apps Script Anda.
-  // Perhatikan: kita tidak menggunakan awalan 'first_' atau 'last_' di sini.
+  // ======================================================================
+  // ✅ BACA DATA USIA DARI SESSIONSTORAGE
+  // ======================================================================
+  try {
+    const storedAgeData = sessionStorage.getItem('ageData');
+    if (storedAgeData) {
+      ageData = JSON.parse(storedAgeData);
+      console.log("[Analytics] Berhasil membaca data usia dari sessionStorage:", ageData);
+      // Hapus data dari session setelah dibaca agar bersih
+      sessionStorage.removeItem('ageData');
+    }
+  } catch(e) {
+    console.error("[Analytics] Gagal mem-parsing data usia dari sessionStorage", e);
+  }
+
+  // Siapkan payload lengkap
   const payload = {
     user_id: user.uid,
     email: user.email,
     user_name: user.displayName || "Tanpa Nama",
     
-    // Data lokasi saat ini
+    // Data usia yang baru didapat
+    age_range: ageData.age_range,
+    minAge: ageData.minAge,
+    
+    // Data lokasi
     latitude: locationData.latitude || "",
     longitude: locationData.longitude || "",
     continent: locationData.continent || "",
@@ -129,9 +141,7 @@ async function logUserLogin(user) {
     timezone: locationData.timezone || ""
   };
 
-  // 5. Kirim data gabungan ke Google Apps Script.
-  // Script di sisi server akan menangani pemisahan ke kolom 'first_' dan 'last_'.
-  console.log("[Analytics] Mengirim data login ke server...", payload);
+  console.log("[Analytics] Mengirim data login (termasuk usia) ke server...", payload);
   sendAnalyticsEvent("USER_LOGIN_ACTIVITY", payload);
 }
 

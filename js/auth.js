@@ -107,16 +107,63 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.getElementById("loginBtn");
 
   // Tombol Login Google
-  if (loginBtn) {
+if (loginBtn) {
     loginBtn.onclick = () => {
       try { logUserBehavior("login_button"); } catch {}
+      
+      // ✅ 1. Buat provider terlebih dahulu
       const provider = new firebase.auth.GoogleAuthProvider();
+      
+      // ✅ 2. Baru tambahkan scope ke provider yang sudah ada
+      // Scope ini akan meminta izin pengguna untuk membaca rentang usia mereka.
+      provider.addScope('https://www.googleapis.com/auth/user.age.range.read');
 
       auth
         .signInWithPopup(provider)
-        .then((result) => {
+        .then(async (result) => {
           const user = result.user;
-          console.log("Login berhasil:", user.displayName);
+          // Dapatkan "kunci" atau Access Token untuk mengakses Google API
+          const credential = result.credential;
+          const accessToken = credential.accessToken;
+
+          console.log("✅ Login via pop-up berhasil untuk:", user.displayName);
+
+          if (accessToken) {
+            try {
+              console.log("[Auth] Mengambil data rentang usia dari Google People API...");
+              const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=ageRanges', {
+                headers: {
+                  'Authorization': `Bearer ${accessToken}`
+                }
+              });
+
+              if (!response.ok) {
+                throw new Error(`Gagal mengambil data People API. Status: ${response.status}`);
+              }
+
+              const profileData = await response.json();
+              
+              if (profileData.ageRanges && profileData.ageRanges.length > 0) {
+                const ageRangeData = profileData.ageRanges[0];
+                const ageData = {
+                  age_range: ageRangeData.ageRange || "UNKNOWN",
+                  minAge: ageRangeData.minAge || null
+                };
+                
+                // Simpan data usia di sessionStorage agar bisa dibaca oleh analytics.js
+                sessionStorage.setItem('ageData', JSON.stringify(ageData));
+                console.log("[Auth] Berhasil mendapatkan dan menyimpan data usia:", ageData);
+              }
+            } catch (error) {
+              console.warn("[Auth] Gagal mengambil atau memproses data usia:", error.message);
+            }
+          }
+          // Setelah ini, onAuthStateChanged akan berjalan dan menangani semua redirect.
+        })
+        .catch((error) => {
+          // ✅ Blok catch yang sudah dibersihkan
+          console.error("Login Gagal:", error);
+          showLoginFailModal(error.message);
 
           if (mainContent) mainContent.classList.remove("d-none");
           if (loginContainer) loginContainer.classList.add("d-none");
