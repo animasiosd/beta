@@ -130,57 +130,65 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================
-  // 6️⃣ CEK STATUS LOGIN
+  // 6️⃣ CEK STATUS LOGIN (VERSI BARU YANG LEBIH CERDAS)
   // ============================
   auth.onAuthStateChanged((user) => {
     const currentPath = window.location.pathname;
 
-    // helper deteksi halaman
-    const onLoginPage = currentPath.endsWith("/beta/login") || currentPath.endsWith("/beta/login/");
-    const onTutorialPage = currentPath.endsWith("/beta/locationtutorial.html") || currentPath.endsWith("/beta/locationtutorial/");
-    const onIndexPage =
-      currentPath.endsWith("/beta/") ||
-      currentPath.endsWith("/beta/index.html") ||
-      currentPath.endsWith("/beta/index");
+    // Helper deteksi halaman
+    const onLoginPage = currentPath.includes("/beta/login");
+    const onTutorialPage = currentPath.includes("/beta/locationtutorial.html");
 
-    // 1) Jika user BELUM login → paksa ke halaman login (dari halaman mana pun)
+    // ======================================================================
+    // PRIORITAS #1: TANGANI PENGGUNA YANG BELUM LOGIN
+    // ======================================================================
     if (!user) {
+      // Jika pengguna belum login dan belum berada di halaman login,
+      // simpan URL tujuan dan paksa ke halaman login.
       if (!onLoginPage) {
-        console.log(`[AUTH-LOG] User belum login. Menyimpan URL: ${urlToSave}`); // 👈 LOG 1
-        // ✅ BARIS INI untuk menyimpan URL saat ini sebelum redirect ke login
-        sessionStorage.setItem('redirectAfterPermission', window.location.href);
+        const urlToSave = window.location.href;
+        console.log(`[AUTH-LOGIC] Pengguna belum login. Menyimpan URL tujuan: ${urlToSave}`);
+        sessionStorage.setItem('redirectAfterPermission', urlToSave);
         redirectTo(URLS.login);
-        return;
+      } else {
+        // Jika sudah di halaman login, cukup sembunyikan loader.
+        hideLoader();
       }
-      hideLoader();
-      return;
+      return; // Hentikan eksekusi di sini untuk pengguna yang belum login.
     }
 
-    // 2) Jika user SUDAH login tapi lokasi BELUM "granted" → arahkan ke tutorial (kecuali sudah di situ)
+    // ======================================================================
+    // JIKA KODE SAMPAI DI SINI, ARTINYA PENGGUNA SUDAH PASTI LOGIN (user === true)
+    // ======================================================================
+    
+    // PRIORITAS #2: TANGANI PENGGUNA YANG SUDAH LOGIN TAPI IZIN LOKASI BELUM ADA
     const statusNow = getLocationStatus();
     if (statusNow !== "granted" && !onTutorialPage) {
-      console.log(`[AUTH-LOG] Izin lokasi belum ada. Menyimpan URL: ${urlToSave}`); // 👈 LOG 2
-      // ✅ BARIS INI untuk menyimpan URL saat ini
-      sessionStorage.setItem('redirectAfterPermission', window.location.href);
+      // URL asli (misal: Toli-Toli) seharusnya sudah tersimpan saat pengguna belum login.
+      // Kita tidak perlu menyimpannya lagi di sini untuk menghindari penimpaan.
+      console.log("[AUTH-LOGIC] Pengguna sudah login, tapi izin lokasi belum ada. Mengarahkan ke tutorial.");
       redirectTo(URLS.tutorial);
       return;
     }
 
-    // 3) Jika user SUDAH login & berada di halaman login → kirim ke link terakhir atau halaman utama
-    if (user && onLoginPage) {
-      // Cek apakah ada URL yang tersimpan dari sesi sebelumnya
+    // PRIORITAS #3: TANGANI PENGGUNA YANG SUDAH LOGIN & TERJEBAK DI HALAMAN LOGIN
+    if (onLoginPage) {
       const redirectUrl = sessionStorage.getItem('redirectAfterPermission');
-      // Jika ada URL tersimpan, gunakan itu. Jika tidak, gunakan halaman utama sebagai default.
       const finalDestination = redirectUrl || URLS.index;
-      // Hapus item dari sessionStorage setelah dibaca agar tidak dipakai lagi di masa depan
+      
+      console.log(`[AUTH-LOGIC] Pengguna sudah login tapi ada di halaman login. Mengarahkan ke: ${finalDestination}`);
+      
       if (redirectUrl) {
         sessionStorage.removeItem('redirectAfterPermission');
       }
-      redirectTo(finalDestination); // Arahkan ke tujuan yang benar
+      redirectTo(finalDestination);
       return;
     }
 
-    // 4) Jika lolos kondisi, user SUDAH login & lokasi OK
+    // PRIORITAS #4: JIKA SEMUA KONDISI DI ATAS TIDAK TERPENUHI
+    // Artinya: Pengguna sudah login, izin lokasi sudah ada, dan tidak di halaman login/tutorial.
+    // Ini adalah kondisi ideal, tampilkan konten utama.
+    console.log("[AUTH-LOGIC] Pengguna sudah login dan izin lokasi OK. Menampilkan konten.");
     handleLoggedInState(user);
   });
 
