@@ -52,50 +52,49 @@ function highlightActiveMenu() {
 // File: js/main.js
 
 function loadDynamicLanguages() {
-  // Tunggu sebentar untuk memastikan navbar.html sudah sepenuhnya dimuat
-  setTimeout(() => {
-    const dropdown = document.getElementById('languagesDropdown');
-    if (!dropdown) {
-      console.error("❌ Element #languagesDropdown masih belum ditemukan. Cek kembali navbar.html.");
-      return;
-    }
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const dropdown = document.getElementById('languagesDropdown');
+      if (!dropdown) {
+        console.error("❌ Element #languagesDropdown masih belum ditemukan. Cek kembali navbar.html.");
+        return reject();
+      }
 
-    fetch(BAHASA_API_URL)
-      .then(response => response.json())
-      .then(data => {
-        const bahasaList = data;
-        if (!Array.isArray(bahasaList) || bahasaList.length === 0) {
-          dropdown.innerHTML = '<li><span class="dropdown-item text-muted">Daftar bahasa kosong.</span></li>';
-          return;
-        }
+      fetch(BAHASA_API_URL)
+        .then(response => response.json())
+        .then(data => {
+          const bahasaList = data;
+          if (!Array.isArray(bahasaList) || bahasaList.length === 0) {
+            dropdown.innerHTML = '<li><span class="dropdown-item text-muted">Daftar bahasa kosong.</span></li>';
+            return resolve();
+          }
 
-        dropdown.innerHTML = ''; // Kosongkan placeholder
+          dropdown.innerHTML = ''; // Kosongkan placeholder
 
-        bahasaList.forEach(bahasa => {
-          if (!bahasa.value || !bahasa.display) return; // Lewati data yang tidak lengkap
+          bahasaList.forEach(bahasa => {
+            if (!bahasa.value || !bahasa.display) return;
 
-          const listItem = document.createElement('li');
-          const link = document.createElement('a');
-          link.className = 'dropdown-item';
-          
-          // UBAH BAGIAN INI: Tambahkan 'display' sebagai parameter URL baru
-          link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}`;
-          
-          link.textContent = `Bahasa ${bahasa.display}`; // Tampilkan nama title window
+            const listItem = document.createElement('li');
+            const link = document.createElement('a');
+            link.className = 'dropdown-item';
+            link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}`;
+            link.textContent = `Bahasa ${bahasa.display}`;
 
-          // ✅ Tracking klik bahasa
-          link.addEventListener("click", () => {
-            logUserBehavior("language_selected", bahasa.display);
+            // ✅ Tracking klik bahasa
+            link.addEventListener("click", () => {
+              logUserBehavior("language_selected", bahasa.display);
+            });
+
+            listItem.appendChild(link);
+            dropdown.appendChild(listItem);
           });
-
-          listItem.appendChild(link);
-          dropdown.appendChild(listItem);
+          resolve();
+        })
+        .catch((err) => {
+          console.error("❌ Gagal memuat bahasa:", err);
+          dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
+          resolve();
         });
-      })
-      
-      .catch((err) => {
-        console.error("❌ Gagal memuat bahasa:", err);
-        dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
-      });
-  }, 100); // Penundaan 100ms untuk stabilitas
+    }, 100);
+  });
 }
