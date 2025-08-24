@@ -104,12 +104,14 @@
 
     <!-- Header -->
     <div class="container tutorial-header">
-        <h1>Aktifkan Izin Lokasi</h1>
-        <p>Silakan izinkan aplikasi mengakses lokasi Anda untuk menampilkan konten sesuai wilayah.</p>
-        <p>Data lokasi aman, tidak diperjualbelikan, dan hanya digunakan untuk meningkatkan pengalaman Anda.</p>
-        <p>Kami menghormati privasi Anda dan memproses data sesuai standar internasional <strong>GDPR</strong> dan <strong>CCPA</strong>.</p>
-        <p>Ikuti panduan di bawah ini untuk memberikan izin lokasi.</p>
-    </div>
+    <h1>Aktifkan Izin Lokasi</h1>
+    <p>Silakan izinkan aplikasi mengakses lokasi Anda untuk menampilkan konten sesuai wilayah.</p>
+    <p>Data lokasi aman, tidak diperjualbelikan, dan hanya digunakan untuk meningkatkan pengalaman Anda.</p>
+    <p>Kami menghormati privasi Anda dan memproses data sesuai standar internasional <strong>GDPR</strong> dan <strong>CCPA</strong>.</p>
+    <!-- ✅ TAMBAHKAN BARIS DI BAWAH INI -->
+    <p>Dengan melanjutkan, Anda menyetujui pengumpulan data seperti yang dijelaskan dalam <a href="https://animasiosd.github.io/beta/privacy_policy.html" target="_blank" rel="noopener noreferrer">Kebijakan Privasi</a> kami.</p>
+    <p>Ikuti panduan di bawah ini untuk memberikan izin lokasi.</p>
+</div>
 
     <!-- Catatan Penting -->
     <div class="container note">
@@ -181,7 +183,7 @@ btnLanjutkan.addEventListener("click", function () {
         const redirectUrl = sessionStorage.getItem('redirectAfterPermission');
         // 👈 LOG 3: Tambahkan log ini di sini
         console.log(`[TUTORIAL-LOG] Tombol Lanjutkan diklik. URL dari sessionStorage: ${redirectUrl}`);
-        
+
         const finalDestination = redirectUrl || "/beta/index.html";
 
         if (result.state === "granted") {
