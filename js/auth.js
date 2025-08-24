@@ -178,9 +178,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 3) Jika user SUDAH login & berada di halaman login → kirim ke halaman utama
+    // 3) Jika user SUDAH login & berada di halaman login → kirim ke link terakhir atau halaman utama
     if (user && onLoginPage) {
-      redirectTo(URLS.index); // bisa diganti ke https://animasiosd.github.io/beta/ untuk URL bersih
+      // Cek apakah ada URL yang tersimpan dari sesi sebelumnya
+      const redirectUrl = sessionStorage.getItem('redirectAfterPermission');
+      // Jika ada URL tersimpan, gunakan itu. Jika tidak, gunakan halaman utama sebagai default.
+      const finalDestination = redirectUrl || URLS.index;
+      // Hapus item dari sessionStorage setelah dibaca agar tidak dipakai lagi di masa depan
+      if (redirectUrl) {
+        sessionStorage.removeItem('redirectAfterPermission');
+      }
+      redirectTo(finalDestination); // Arahkan ke tujuan yang benar
       return;
     }
 
