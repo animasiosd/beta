@@ -1,5 +1,5 @@
 // ============================
-// 1️⃣ KONFIGURASI FIREBASE
+// 1️⃣ KONFIGURASI FIREBASE sementara oke mengenai redirect URL karena izin lokasi
 // ============================
 const firebaseConfig = {
   apiKey: "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E",
@@ -186,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
     handleLoggedInState(user);
   });
 
-  // [Tetap dalam struktur ini] — atur tampilan saat sudah login sementara oke
+  // [Tetap dalam struktur ini] — atur tampilan saat sudah login 
   function handleLoggedInState(user) {
     if (pageLoader) pageLoader.classList.add("d-none");
 

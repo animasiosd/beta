@@ -115,3 +115,65 @@ function loadDynamicLanguages() {
       });
   });
 }
+
+// ======================================================================
+// BAGIAN KODE UNTUK FUNGSI INSTALL PWA
+// Tambahkan ini di bagian paling bawah file main.js Anda
+// ======================================================================
+
+// Variabel global untuk menyimpan event instalasi agar bisa dipanggil nanti
+let deferredPrompt;
+
+// 1. Listener untuk "menangkap" event saat browser siap menampilkan prompt instalasi
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Mencegah browser menampilkan prompt mini-infobar default di Chrome
+  e.preventDefault();
+  
+  // Simpan event tersebut agar bisa kita picu saat tombol diklik
+  deferredPrompt = e;
+  
+  // Ambil tombol instalasi dari navbar
+  const installButton = document.getElementById('manualInstallBtn');
+  
+  // Tampilkan tombol tersebut karena sekarang aplikasi bisa diinstal
+  if (installButton) {
+    installButton.style.display = 'block';
+    console.log('✅ PWA siap untuk diinstal.');
+  }
+});
+
+// 2. Listener untuk tombol install manual kita
+// Kita pasang listener ke document karena navbar dimuat secara dinamis
+document.addEventListener('click', (event) => {
+  // Cek apakah yang diklik adalah tombol install kita
+  if (event.target && event.target.id === 'manualInstallBtn') {
+    
+    // Pastikan event instalasi sudah ditangkap sebelumnya
+    if (deferredPrompt) {
+      // Tampilkan prompt instalasi default dari browser
+      deferredPrompt.prompt();
+      
+      // Tunggu hasil pilihan pengguna (instal atau batal)
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('👍 Pengguna menerima instalasi PWA.');
+          // Sembunyikan tombol setelah diinstal
+          event.target.style.display = 'none';
+        } else {
+          console.log('👎 Pengguna menolak instalasi PWA.');
+        }
+        // Reset variabel setelah digunakan
+        deferredPrompt = null;
+      });
+    } else {
+      console.log('Event instalasi belum siap atau sudah digunakan.');
+    }
+  }
+});
+
+// 3. Listener untuk melacak saat aplikasi berhasil diinstal
+window.addEventListener('appinstalled', (evt) => {
+  console.log('🎉 Aplikasi berhasil diinstal.');
+  // Kosongkan deferredPrompt agar tidak muncul lagi
+  deferredPrompt = null;
+});
