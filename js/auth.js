@@ -31,28 +31,6 @@ const URLS = {
   tutorial: "https://animasiosd.github.io/beta/locationtutorial.html",
 };
 
-// ============================
-// 2️⃣ FUNGSI TAMPILKAN NAVBAR
-// ============================
-function toggleNavbarVisibility(user) {
-  const navbarPlaceholder = document.getElementById("navbar-placeholder");
-  if (!navbarPlaceholder) return;
-
-  navbarPlaceholder.style.display = user ? "block" : "none";
-
-  if (user && !navbarLoaded) {
-    fetch("navbar.html")
-      .then((res) => res.text())
-      .then((html) => {
-        navbarPlaceholder.innerHTML = html;
-        navbarLoaded = true;
-      })
-      .catch(() => {
-        // diamkan saja jika fetch gagal, agar tidak ganggu alur login
-      });
-  }
-}
-
 // Fungsi untuk redirect halaman
 function redirectTo(url) {
   window.location.href = url;

@@ -50,14 +50,6 @@ document.addEventListener("DOMContentLoaded", function () {
 function initializeNavbarFunctions() {
   // Pastikan fungsi-fungsi ini hanya dipanggil sekali
   if (window.navbarInitialized) return;
-
-  // PENTING: Pastikan file auth.js sudah dimuat SEBELUM main.js di file HTML Anda
-  // agar fungsi ini bisa ditemukan.
-  if (typeof toggleNavbarVisibility === 'function') {
-    toggleNavbarVisibility(firebase.auth().currentUser);
-  } else {
-    console.error('❌ Fungsi toggleNavbarVisibility tidak ditemukan. Periksa urutan load script di HTML.');
-  }
   
   highlightActiveMenu();
   loadDynamicLanguages();
