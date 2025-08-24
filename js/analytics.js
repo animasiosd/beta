@@ -83,19 +83,56 @@ function sendAnalyticsEvent(eventType, dataObject) {
   }).catch(err => console.error("❌ Gagal kirim analytics:", err));
 }
 
-function logUserLogin(user) {
-  if (!user) return;
-  sendAnalyticsEvent("USER_LOGIN_ACTIVITY", {
+async function logUserLogin(user) {
+  // 1. Jangan lakukan apa pun jika tidak ada user atau jika user adalah anonim.
+  if (!user || user.isAnonymous) {
+    console.log("[Analytics] Proses login dibatalkan untuk user anonim atau tidak valid.");
+    return;
+  }
+
+  let locationData = {}; // Siapkan objek kosong untuk data lokasi
+
+  try {
+    // 2. Panggil getUserLocation() dari geotracker.js untuk mendapatkan detail lokasi.
+    console.log("[Analytics] Memulai pengambilan data lokasi untuk user:", user.displayName);
+    locationData = await getUserLocation();
+    console.log("[Analytics] Berhasil mendapatkan data lokasi:", locationData.city, locationData.country);
+  } catch (error) {
+    // 3. Jika pengambilan lokasi gagal (misal: izin ditolak),
+    // kita tetap lanjut, namun data lokasi akan kosong.
+    console.warn("[Analytics] Gagal mendapatkan data lokasi. Melanjutkan tanpa data geo.", error.message);
+  }
+
+  // 4. Siapkan payload sesuai dengan nama kolom di Google Apps Script Anda.
+  // Perhatikan: kita tidak menggunakan awalan 'first_' atau 'last_' di sini.
+  const payload = {
     user_id: user.uid,
     email: user.email,
     user_name: user.displayName || "Tanpa Nama",
-    age_range: null,
-    minAge: null,
-    first_login_city: null,
-    last_login_city: null,
-    first_login_country: null,
-    last_login_country: null
-  });
+    
+    // Data lokasi saat ini
+    latitude: locationData.latitude || "",
+    longitude: locationData.longitude || "",
+    continent: locationData.continent || "",
+    country: locationData.country || "",
+    country_code: locationData.country_code || "",
+    state: locationData.state || "",
+    county: locationData.county || "",
+    city: locationData.city || "",
+    municipality: locationData.municipality || "",
+    town: locationData.town || "",
+    village: locationData.village || "",
+    suburb: locationData.suburb || "",
+    road: locationData.road || "",
+    postcode: locationData.postcode || "",
+    display_name: locationData.display_name || "",
+    timezone: locationData.timezone || ""
+  };
+
+  // 5. Kirim data gabungan ke Google Apps Script.
+  // Script di sisi server akan menangani pemisahan ke kolom 'first_' dan 'last_'.
+  console.log("[Analytics] Mengirim data login ke server...", payload);
+  sendAnalyticsEvent("USER_LOGIN_ACTIVITY", payload);
 }
 
 function logPageView(user) {
