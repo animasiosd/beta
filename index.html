@@ -82,59 +82,5 @@
 <script src="js/geotracker.js"></script>
 <script src="js/analytics.js"></script>
 
-<script>
-// Page loader dan fetch navbar + bahasa
-document.addEventListener("DOMContentLoaded", function() {
-  const pageLoader = document.getElementById('page-loader');
-  const loaderTimeout = 15000; // fallback 15 detik
-
-  const timeoutPromise = new Promise(resolve => setTimeout(resolve, loaderTimeout));
-
-  const loadNavbarAndLanguages = new Promise((resolve, reject) => {
-    const navbarPlaceholder = document.getElementById("navbar-placeholder");
-    if (!navbarPlaceholder) return reject("Navbar placeholder tidak ditemukan.");
-
-    const cachedNavbar = localStorage.getItem('navbarHTML');
-    if (cachedNavbar) {
-      navbarPlaceholder.innerHTML = cachedNavbar;
-    }
-
-    fetch('navbar.html')
-      .then(res => {
-        if(!res.ok) throw new Error('Gagal memuat navbar.');
-        return res.text();
-      })
-      .then(html => {
-        // Hitung jumlah bahasa di dropdown
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const newCount = doc.querySelectorAll('#languagesDropdown .dropdown-item').length;
-
-        const oldCount = cachedNavbar ? parser.parseFromString(cachedNavbar,'text/html').querySelectorAll('#languagesDropdown .dropdown-item').length : 0;
-
-        if(newCount !== oldCount) {
-          navbarPlaceholder.innerHTML = html;
-          localStorage.setItem('navbarHTML', html);
-        }
-
-        // Panggil fungsi visibilitas navbar
-        toggleNavbarVisibility(firebase.auth().currentUser);
-
-        // Tunggu navbar selesai inject, baru load bahasa
-        loadDynamicLanguages().then(() => resolve('fetched'));
-      })
-      .catch(err => {
-        console.error("❌ Error memuat navbar:", err);
-        resolve('error');
-      });
-  });
-
-  Promise.race([loadNavbarAndLanguages, timeoutPromise])
-    .finally(() => {
-      pageLoader.style.display = 'none';
-    });
-});
-</script>
-
 </body>
 </html>
