@@ -118,7 +118,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const user = result.user;
           console.log("Login berhasil:", user.displayName);
 
-          toggleNavbarVisibility(user);
           if (mainContent) mainContent.classList.remove("d-none");
           if (loginContainer) loginContainer.classList.add("d-none");
 
@@ -187,7 +186,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // [Tetap dalam struktur ini] — atur tampilan saat sudah login
   function handleLoggedInState(user) {
-    toggleNavbarVisibility(user);
     if (pageLoader) pageLoader.classList.add("d-none");
 
     if (mainContent) mainContent.classList.remove("d-none");
